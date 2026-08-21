@@ -1,0 +1,368 @@
+/* ==================================================
+   Container do carrinho público
+   Mantém largura e padding dentro do viewport sem
+   depender de overflow global para esconder cortes.
+   ================================================== */
+#cart-drawer.cart-drawer {
+    background: #f8f7f5;
+    box-sizing: border-box;
+    max-width: 980px;
+    min-width: 0;
+    padding: 0;
+    width: min(100%, 980px);
+}
+
+/* O cabeçalho fixa a hierarquia do pedido e mantém o controle de fechamento acessível. */
+.cart-drawer__header {
+    background: #fff;
+    border-bottom: 1px solid #eee8e1;
+    box-sizing: border-box;
+    min-width: 0;
+    padding: 1.35rem 1.5rem 1rem;
+}
+
+/* ==================================================
+   Grid responsivo do carrinho
+   A área reservada e o espaçamento interno impedem
+   que o resumo ultrapasse a largura da grade.
+   ================================================== */
+.cart-layout {
+    box-sizing: border-box;
+    display: grid;
+    flex: 1;
+    gap: 0 1.5rem;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
+    min-height: 0;
+    min-width: 0;
+    padding-right: 1.5rem;
+    width: 100%;
+}
+
+/* A lista recebe rolagem própria para manter o resumo sempre disponível. */
+.cart-items {
+    background: #f8f7f5;
+    box-sizing: border-box;
+    min-width: 0;
+    padding: 1.25rem 1.5rem;
+    width: 100%;
+}
+
+/* Cada item vira um card claro com hierarquia para nome, detalhes, quantidade e subtotal. */
+.cart-item {
+    background: #fff;
+    border: 1px solid #eee8e1;
+    border-radius: 16px;
+    box-sizing: border-box;
+    box-shadow: 0 8px 20px rgba(37, 37, 37, .05);
+    display: grid;
+    gap: .85rem;
+    margin-bottom: .9rem;
+    min-width: 0;
+    padding: 1rem;
+    width: 100%;
+}
+
+/* O conteúdo textual pode encolher em cards estreitos sem empurrar a imagem ou os controles. */
+.cart-item__overview,
+.cart-item__details {
+    min-width: 0;
+}
+
+/* O nome do produto é o primeiro elemento de leitura do card. */
+.cart-item__details h3 {
+    color: #252525;
+    font-size: 1.05rem;
+    margin: 0;
+}
+
+/* O preço unitário fica secundário para dar prioridade ao subtotal final do item. */
+.cart-item__details small {
+    color: #6d6a66;
+    display: block;
+    margin-top: .3rem;
+}
+
+/* Os adicionais são listados um a um, facilitando a conferência antes do checkout. */
+.cart-item__extras {
+    color: #6d6a66;
+    font-size: .82rem;
+    list-style: none;
+    margin: .65rem 0 0;
+    padding: 0;
+}
+
+/* Cada adicional preserva um espaçamento curto e legível. */
+.cart-item__extras li + li {
+    margin-top: .25rem;
+}
+
+/* A observação recebe uma moldura rosé discreta para não se perder entre os detalhes. */
+.cart-item__note {
+    background: #fff6da;
+    border-left: 3px solid #c98d86;
+    border-radius: 6px;
+    color: #564b46;
+    font-size: .82rem;
+    margin: .75rem 0 0;
+    padding: .55rem .65rem;
+}
+
+/* Os controles arredondados deixam claros os limites de diminuir ou aumentar a quantidade. */
+.cart-item__controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .55rem;
+    min-width: 0;
+}
+
+/* Os botões preservam os atributos de ação existentes e apenas ganham uma área maior de toque. */
+.cart-item__controls button:not(.cart-remove) {
+    align-items: center;
+    border-radius: 50%;
+    display: inline-flex;
+    font-size: 1.1rem;
+    height: 2.25rem;
+    justify-content: center;
+    padding: 0;
+    width: 2.25rem;
+}
+
+/* A quantidade fica centralizada entre os botões e não permite redução abaixo de um pela lógica existente. */
+.cart-item__quantity {
+    align-items: center;
+    background: #fff;
+    border: 1px solid #ebe7e1;
+    border-radius: 999px;
+    display: inline-flex;
+    font-weight: 800;
+    height: 2.25rem;
+    justify-content: center;
+    min-width: 2.5rem;
+}
+
+/* A remoção permanece deliberadamente secundária para reduzir exclusões acidentais. */
+.cart-item__controls .cart-remove {
+    margin-left: auto;
+}
+
+/* O subtotal do item é separado da quantidade para facilitar a conferência dos valores. */
+.cart-item__total {
+    align-items: center;
+    border-top: 1px solid #f0ece7;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .35rem .75rem;
+    justify-content: space-between;
+    margin: 0;
+    padding-top: .75rem;
+}
+
+/* O texto do subtotal tem menor peso que o valor monetário. */
+.cart-item__total span {
+    color: #6d6a66;
+    font-size: .82rem;
+}
+
+/* O valor do item ganha destaque sem competir com o total geral. */
+.cart-item__total strong {
+    color: #252525;
+    font-size: 1rem;
+    margin-left: auto;
+    white-space: nowrap;
+}
+
+/* ==================================================
+   Resumo do pedido
+   O card ocupa somente sua faixa de grid e todos os
+   filhos respeitam a largura disponível.
+   ================================================== */
+.cart-summary {
+    align-self: start;
+    background: #fff;
+    border: 1px solid #eee8e1;
+    border-radius: 16px;
+    box-sizing: border-box;
+    box-shadow: 0 10px 24px rgba(37, 37, 37, .07);
+    display: grid;
+    gap: .9rem;
+    margin: 1.25rem 0;
+    max-width: 100%;
+    min-width: 0;
+    padding: 1.25rem;
+    width: 100%;
+}
+
+/* O título introduz o resumo sem competir com o total destacado. */
+.cart-summary h3 {
+    font-size: 1rem;
+    margin: 0;
+}
+
+/* O total é o principal elemento visual da tela do carrinho. */
+.cart-summary__row {
+    align-items: center;
+    background: #fff6da;
+    border: 1px solid #f2d778;
+    border-radius: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem .75rem;
+    justify-content: space-between;
+    min-width: 0;
+    padding: .9rem;
+}
+
+/* A etiqueta explica o valor sem reduzir o destaque do montante final. */
+.cart-summary__row span {
+    color: #6d5a1c;
+    font-size: .85rem;
+    font-weight: 700;
+}
+
+/* O total geral utiliza a cor de texto principal e tipografia maior. */
+.cart-summary__row strong {
+    color: #252525;
+    font-size: 1.3rem;
+    margin-left: auto;
+    white-space: nowrap;
+}
+
+/* O aviso deixa explícito que valores finais continuam sujeitos ao cálculo seguro do checkout. */
+.cart-summary__notice {
+    color: #75716c;
+    font-size: .75rem;
+    line-height: 1.45;
+    margin: 0;
+}
+
+/* O link secundário mantém a navegação para o cardápio do mesmo slug. */
+.cart-summary .cart-continue {
+    background: #fff;
+    border: 1px solid #e9cfcb;
+    box-sizing: border-box;
+    color: #743f39;
+    max-width: 100%;
+    min-width: 0;
+    text-align: center;
+    text-decoration: none;
+    width: 100%;
+}
+
+/* O CTA principal conserva texto e total visíveis dentro do resumo, inclusive em telas estreitas. */
+.cart-summary .cart-checkout {
+    align-items: center;
+    background: var(--cor-primaria, #f6c445);
+    border: 1px solid #edbd35;
+    border-radius: 8px;
+    box-sizing: border-box;
+    color: #4c3b08;
+    display: flex;
+    font-weight: 800;
+    gap: .5rem;
+    justify-content: space-between;
+    max-width: 100%;
+    min-width: 0;
+    padding: .75rem;
+    text-align: center;
+    text-decoration: none;
+    width: 100%;
+}
+
+.cart-summary .cart-checkout > strong {
+    margin-left: auto;
+    white-space: nowrap;
+}
+
+/* ==================================================
+   Carrossel “Peça também”
+   A rolagem é interna ao resumo e seus cards não
+   podem ampliar a largura do card pai.
+   ================================================== */
+#cart-drawer .cart-suggestions,
+#cart-drawer .cart-suggestions > div {
+    box-sizing: border-box;
+    max-width: 100%;
+    min-width: 0;
+}
+
+#cart-drawer .cart-suggestions > div {
+    display: flex;
+    gap: .65rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    padding-bottom: .25rem;
+    width: 100%;
+}
+
+#cart-drawer .cart-suggestion {
+    box-sizing: border-box;
+    flex: 0 0 150px;
+    max-width: 150px;
+    min-width: 0;
+}
+
+/* Sem itens, o resumo e seus CTAs são ocultados para destacar apenas o retorno ao cardápio. */
+.cart-drawer--empty .cart-summary {
+    display: none;
+}
+
+/* O estado vazio usa a área completa e centraliza a ilustração e o botão de retorno. */
+.cart-drawer--empty .cart-items {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+}
+
+/* O botão criado pelo JavaScript recebe o mesmo padrão secundário da navegação do carrinho. */
+.cart-empty button {
+    background: #fff;
+    border: 1px solid #e9cfcb;
+    color: #743f39;
+    margin-top: 1rem;
+    max-width: 220px;
+}
+
+/* ==================================================
+   Tablet e celular
+   Aos 900px, a grade deixa de comprimir duas colunas
+   e posiciona o resumo abaixo dos itens.
+   ================================================== */
+@media (max-width: 900px) {
+    #cart-drawer.cart-drawer {
+        max-width: none;
+        width: 100%;
+    }
+
+    .cart-layout {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        overflow-x: visible;
+        overflow-y: auto;
+        padding: 0 1rem 1rem;
+    }
+
+    .cart-items {
+        flex: 1;
+        overflow: visible;
+        padding: 1rem 0;
+    }
+
+    .cart-summary {
+        margin: 0;
+    }
+}
+
+@media (max-width: 420px) {
+    .cart-drawer__header {
+        padding: 1rem;
+    }
+
+    .cart-summary {
+        padding: 1rem;
+    }
+
+    .cart-summary__row strong {
+        font-size: 1.15rem;
+    }
+}

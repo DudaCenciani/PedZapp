@@ -1,0 +1,95 @@
+/* ==================================================
+   Ações pendentes geradas pelo serviço da empresa
+   ================================================== */
+.pending-actions {
+    display: grid;
+    gap: .8rem;
+}
+
+.pending-actions > h2 {
+    font-size: 1rem;
+    margin: 0;
+}
+
+.pending-actions__list {
+    display: grid;
+    gap: .55rem;
+}
+
+.pending-actions__item {
+    align-items: center;
+    border: 1px solid #eee8e1;
+    border-left: 3px solid #e9cfcb;
+    border-radius: 10px;
+    display: flex;
+    gap: .75rem;
+    justify-content: space-between;
+    padding: .7rem .75rem;
+}
+
+.pending-actions__item--alta { border-left-color: #c98d86; }
+.pending-actions__item--media { border-left-color: #f6c445; }
+.pending-actions__item--baixa { border-left-color: #d9cec3; }
+
+.pending-actions__item h3 {
+    font-size: .86rem;
+    margin: 0;
+}
+
+.pending-actions__item p,
+.pending-actions__more {
+    color: #727272;
+    font-size: .76rem;
+    line-height: 1.35;
+    margin: .2rem 0 0;
+}
+
+.pending-actions__item a {
+    background: #fff6da;
+    border: 1px solid #f0d98e;
+    border-radius: 8px;
+    color: #72520a;
+    flex: 0 0 auto;
+    font-size: .76rem;
+    font-weight: 800;
+    padding: .48rem .6rem;
+    text-decoration: none;
+}
+
+/* O estado positivo substitui o placeholder antigo sem criar um card visualmente pesado. */
+.pending-actions__empty {
+    align-items: center;
+    display: flex;
+    gap: .7rem;
+}
+
+.pending-actions__empty > span {
+    align-items: center;
+    background: #e2f3e8;
+    border-radius: 50%;
+    color: #237244;
+    display: inline-flex;
+    font-weight: 850;
+    height: 2.25rem;
+    justify-content: center;
+    width: 2.25rem;
+}
+
+.pending-actions__empty h2,
+.pending-actions__empty p {
+    margin: 0;
+}
+
+.pending-actions__empty h2 { font-size: 1rem; }
+.pending-actions__empty p { color: #727272; font-size: .82rem; margin-top: .2rem; }
+
+@media (max-width: 640px) {
+    .pending-actions__item {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .pending-actions__item a {
+        width: 100%;
+    }
+}

@@ -1,0 +1,58 @@
+﻿@model PedZapp.Models.Categoria
+
+@{
+    ViewData["Title"] = "Editar Categoria";
+    // Recupera o slug da navegação atual sem introduzir um identificador interno na View.
+    var slug = Context.Request.Query["slug"].ToString();
+}
+
+<main class="container mt-5 pz-admin-card">
+    @* O cabeçalho oferece retorno consistente sem modificar o bind de edição. *@
+    <partial name="_CabecalhoAdministrativo" model='new PedZapp.ViewModels.Shared.CabecalhoAdministrativoViewModel { Slug = slug, Icone = "✎", Titulo = "Editar categoria", Descricao = "Atualize o nome e a disponibilidade da categoria." }' />
+
+    <form asp-action="Edit">
+
+        <input asp-for="Id" type="hidden" />
+
+        <div class="mb-3">
+
+            <label asp-for="Nome"
+                   class="form-label">
+            </label>
+
+            <input asp-for="Nome"
+                   class="form-control" />
+
+        </div>
+
+        <div class="form-check mb-3">
+
+            <input asp-for="Ativa"
+                   class="form-check-input" />
+
+            <label asp-for="Ativa"
+                   class="form-check-label">
+
+                Categoria Ativa
+
+            </label>
+
+        </div>
+
+        <button type="submit"
+                class="pz-btn pz-btn--primary">
+
+            Salvar Alterações
+
+        </button>
+
+        <a asp-action="Index"
+           class="pz-btn pz-btn--neutral">
+
+            Voltar
+
+        </a>
+
+    </form>
+
+</main>

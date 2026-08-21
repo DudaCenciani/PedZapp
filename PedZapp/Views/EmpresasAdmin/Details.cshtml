@@ -1,0 +1,217 @@
+﻿@model PedZapp.Models.Empresa
+
+@{
+    ViewData["Title"] =
+        "Detalhes da Empresa";
+}
+
+<div class="container mt-4">
+
+    <div class="d-flex
+                justify-content-between
+                align-items-center
+                mb-4">
+
+        <div>
+            <h2>
+                @Model.NomeFantasia
+            </h2>
+
+            <p class="text-muted mb-0">
+                Informações completas
+                da empresa
+            </p>
+        </div>
+
+        <div>
+            <a asp-action="Edit"
+               asp-route-id="@Model.Id"
+               class="btn btn-warning">
+                Editar
+            </a>
+
+            <a asp-action="Index"
+               class="btn btn-secondary">
+                Voltar
+            </a>
+        </div>
+
+    </div>
+
+    <div class="card shadow-sm p-4">
+
+        <div class="row">
+
+            <div class="col-md-6">
+
+                <h5>
+                    Dados da Empresa
+                </h5>
+
+                <hr />
+
+                <p>
+                    <strong>
+                        Nome Fantasia:
+                    </strong>
+                    @Model.NomeFantasia
+                </p>
+
+                <p>
+                    <strong>
+                        Razão Social:
+                    </strong>
+                    @Model.RazaoSocial
+                </p>
+
+                <p>
+                    <strong>
+                        CPF/CNPJ:
+                    </strong>
+                    @Model.CpfCnpj
+                </p>
+
+                <p>
+                    <strong>
+                        Slug:
+                    </strong>
+                    /loja/@Model.Slug
+                </p>
+
+            </div>
+
+            <div class="col-md-6">
+
+                <h5>
+                    Contato
+                </h5>
+
+                <hr />
+
+                <p>
+                    <strong>
+                        E-mail:
+                    </strong>
+                    @Model.Email
+                </p>
+
+                <p>
+                    <strong>
+                        Telefone:
+                    </strong>
+                    @Model.Telefone
+                </p>
+
+                <p>
+                    <strong>
+                        WhatsApp:
+                    </strong>
+                    @Model.WhatsApp
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="row mt-4">
+
+            <div class="col-md-6">
+
+                <h5>
+                    Endereço
+                </h5>
+
+                <hr />
+
+                <p>
+                    <strong>
+                        Endereço:
+                    </strong>
+                    @Model.Endereco,
+                    @Model.Numero
+                </p>
+
+                <p>
+                    <strong>
+                        Bairro:
+                    </strong>
+                    @Model.Bairro
+                </p>
+
+                <p>
+                    <strong>
+                        Cidade:
+                    </strong>
+                    @Model.Cidade
+                    -
+                    @Model.Estado
+                </p>
+
+                <p>
+                    <strong>
+                        CEP:
+                    </strong>
+                    @Model.CEP
+                </p>
+
+            </div>
+
+            <div class="col-md-6">
+
+                <h5>
+                    Sistema
+                </h5>
+
+                <hr />
+
+                <p>
+                    <strong>Status:</strong>
+
+                    @if (Model.Ativa)
+                    {
+                        <span class="badge bg-success">
+                            Ativa
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">
+                            Inativa
+                        </span>
+                    }
+                </p>
+
+                <p>
+                    <strong>
+                        Plano ativo:
+                    </strong>
+
+                    @if (Model.PlanoAtivo)
+                    {
+                        <span class="badge bg-primary">
+                            Sim
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">
+                            Não
+                        </span>
+                    }
+                </p>
+
+                <p>
+                    <strong>
+                        Criada em:
+                    </strong>
+                    @Model.DataCriacao
+                    .ToString("dd/MM/yyyy")
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

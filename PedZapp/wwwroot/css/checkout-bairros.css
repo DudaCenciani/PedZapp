@@ -1,0 +1,88 @@
+/* O select permanece no DOM para as regras existentes, mas fica visualmente oculto em favor dos cards acessíveis. */
+.checkout-bairro-native {
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+}
+
+/* A lista organiza bairros em uma grade confortável sem alterar a ordenação recebida do servidor. */
+.checkout-bairro-list {
+    border: 0;
+    display: grid;
+    gap: .7rem;
+    margin: 1rem 0 .45rem;
+    padding: 0;
+}
+
+/* O título explica a ação de seleção para leitores visuais e de tela. */
+.checkout-bairro-list legend {
+    font-size: .95rem;
+    font-weight: 800;
+    margin-bottom: .15rem;
+}
+
+/* Cada bairro recebe uma área grande de toque e mostra exclusivamente nome e taxa. */
+.checkout-bairro-card {
+    align-items: center;
+    background: #fff;
+    border: 1px solid #ebe7e1;
+    border-radius: 14px;
+    box-shadow: 0 4px 14px rgba(37, 37, 37, .04);
+    color: #252525;
+    display: flex;
+    font: inherit;
+    gap: .8rem;
+    justify-content: space-between;
+    padding: .95rem 1rem;
+    text-align: left;
+    transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+    width: 100%;
+}
+
+/* O nome do bairro permanece como o elemento principal da escolha. */
+.checkout-bairro-card__name {
+    font-weight: 800;
+}
+
+/* A taxa usa tom secundário, preservando a leitura rápida do nome. */
+.checkout-bairro-card strong {
+    color: #743f39;
+    font-size: .86rem;
+    white-space: nowrap;
+}
+
+/* A entrega gratuita recebe verde somente como status positivo, conforme a identidade visual. */
+.checkout-bairro-card .checkout-bairro-card__fee--free {
+    color: #239b56;
+}
+
+/* O card selecionado usa amarelo e rosé para dar retorno imediato ao toque. */
+.checkout-bairro-card.is-selected {
+    background: #fff6da;
+    border-color: #f6c445;
+    box-shadow: 0 7px 18px rgba(201, 141, 134, .16);
+}
+
+/* O foco de teclado segue a mesma indicação clara da seleção. */
+.checkout-bairro-card:focus-visible {
+    outline: 3px solid #c98d86;
+    outline-offset: 2px;
+}
+
+/* Em telas largas, os cards formam duas colunas para reduzir a rolagem. */
+@media (min-width: 640px) {
+    .checkout-bairro-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* No celular, os cards permanecem em uma coluna com área de toque ampla. */
+@media (max-width: 639px) {
+    .checkout-bairro-card {
+        min-height: 4.25rem;
+    }
+}

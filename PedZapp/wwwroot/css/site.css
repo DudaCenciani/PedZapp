@@ -1,0 +1,24 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+}
+/* Padroniza o retorno ao painel sem depender de URL fixa ou de EmpresaId no navegador. */
+.btn-voltar-painel{align-items:center;background:#f6c445;border:1px solid #dfb022;border-radius:10px;box-shadow:0 4px 12px rgba(92,67,0,.15);color:#4b3905;display:inline-flex;font-weight:800;gap:.35rem;margin-bottom:1rem;padding:.62rem .85rem;text-decoration:none;transition:background-color .2s ease,box-shadow .2s ease,transform .2s ease}.btn-voltar-painel:hover{background:#eabd32;color:#3c2d03;box-shadow:0 7px 16px rgba(92,67,0,.2);transform:translateY(-1px)}.btn-voltar-painel:focus-visible{outline:3px solid #c98d86;outline-offset:3px}

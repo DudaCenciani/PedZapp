@@ -1,0 +1,64 @@
+@using System.Globalization
+@using System.Text.Json
+@model PedZapp.ViewModels.Mesa.ComandaViewModel
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+@{
+    ViewData["Title"] = $"Comanda {Model.NomeMesa}";
+    var cultura = new CultureInfo("pt-BR");
+    var pendentes = Model.Itens.Where(i => !i.EnviadoParaCozinha).ToList();
+    var enviados = Model.Itens.Where(i => i.EnviadoParaCozinha).ToList();
+    var catalogo = JsonSerializer.Serialize(Model.Produtos.Select(p => new { p.Id, p.CategoriaId, p.Categoria, p.Nome, Preco = p.PrecoPromocional ?? p.Preco }));
+    var adicionais = JsonSerializer.Serialize(Model.Adicionais);
+}
+<link rel="stylesheet" href="~/css/mesas.css" asp-append-version="true" />
+<main class="mesas-page comanda-page" data-comanda-catalogo='@Html.Raw(catalogo)' data-comanda-adicionais='@Html.Raw(adicionais)'>
+    @* Mantém um retorno direto ao painel sem alterar o fluxo da comanda. *@
+    <partial name="_BotaoVoltarPainel" model="Model.Slug" />
+    <header class="comanda-hero">
+        <div>
+            <p class="eyebrow">Atendimento presencial · @Model.NumeroComanda</p>
+            <h1>@Model.NomeMesa <span class="status-pill status-pill--open">Aberta</span></h1>
+            <p class="comanda-meta">Garçom: <strong>@Model.Funcionario</strong> · Aberta às @Model.DataAbertura.ToLocalTime().ToString("HH:mm")</p>
+        </div>
+        <div class="comanda-hero__actions">
+            <a asp-action="Fechar" asp-route-slug="@Model.Slug" asp-route-mesaId="@Model.MesaId" class="mesa-secondary">Fechar conta</a>
+            <strong class="comanda-total">R$ @Model.Total.ToString("N2", cultura)<small>Total atual</small></strong>
+        </div>
+    </header>
+    @if (TempData["Sucesso"] is string sucesso) { <p class="mesa-feedback">@sucesso</p> }
+    @if (TempData["Erro"] is string erro) { <p class="mesa-error">@erro</p> }
+
+    <section class="comanda-workspace">
+        <section class="catalogo-panel" aria-label="Catálogo de produtos">
+            <div class="section-heading"><div><p class="eyebrow">Lançamento rápido</p><h2>Adicionar produtos</h2></div></div>
+            <div class="catalogo-filters"><label class="search-field"><span>⌕</span><input type="search" data-produto-busca placeholder="Pesquisar produto..." autocomplete="off" /></label><select data-categoria-filtro aria-label="Filtrar por categoria"><option value="">Todas as categorias</option>@foreach (var categoria in Model.Produtos.Select(p => new { p.CategoriaId, p.Categoria }).Distinct().OrderBy(c => c.Categoria)) { <option value="@categoria.CategoriaId">@categoria.Categoria</option> }</select></div>
+            <div class="produto-results" data-produto-resultados></div>
+            <p class="empty-state" data-produto-vazio hidden>Nenhum produto ativo encontrado.</p>
+        </section>
+
+        <aside class="consumo-panel">
+            <div class="section-heading"><div><p class="eyebrow">Resumo</p><h2>Consumo atual</h2></div><a asp-action="Fechar" asp-route-slug="@Model.Slug" asp-route-mesaId="@Model.MesaId" class="link-action">Ver conta</a></div>
+            <div class="consumo-list">
+                @if (!Model.Itens.Any()) { <p class="empty-state">Nenhum item lançado nesta comanda.</p> }
+                @foreach (var item in pendentes) { <article class="consumo-item consumo-item--pending"><div class="consumo-item__main"><span class="quantity-badge">@item.Quantidade×</span><div><strong>@item.Nome</strong><p>@(item.Adicionais.Any() ? string.Join(" · ", item.Adicionais) : "Sem adicionais")</p>@if (!string.IsNullOrWhiteSpace(item.Observacao)) { <p class="item-observacao">Obs.: @item.Observacao</p> }<details class="editar-item"><summary>Editar item</summary><form asp-action="EditarItem" asp-route-slug="@Model.Slug" asp-route-mesaId="@Model.MesaId" asp-route-itemId="@item.Id" method="post">@Html.AntiForgeryToken()<input name="quantidade" type="number" min="1" max="99" value="@item.Quantidade" aria-label="Quantidade" /><input name="observacao" maxlength="500" value="@item.Observacao" placeholder="Observação" /><button type="submit" class="mesa-secondary">Salvar</button></form></details></div></div><div class="consumo-item__value"><strong>R$ @item.Subtotal.ToString("N2", cultura)</strong><small>R$ @item.PrecoUnitario.ToString("N2", cultura) un.</small><form asp-action="RemoverItem" asp-route-slug="@Model.Slug" asp-route-mesaId="@Model.MesaId" asp-route-itemId="@item.Id" method="post" data-confirm="Remover este item que ainda não foi enviado?"><input type="hidden" name="__RequestVerificationToken" value="@Antiforgery.GetAndStoreTokens(Context).RequestToken" /><button type="submit" class="text-danger">Remover</button></form></div></article> }
+                @if (enviados.Any()) { <p class="list-separator">Enviados à cozinha</p>@foreach (var item in enviados) { <article class="consumo-item consumo-item--sent"><div class="consumo-item__main"><span class="quantity-badge">@item.Quantidade×</span><div><strong>@item.Nome</strong><p>@(item.Adicionais.Any() ? string.Join(" · ", item.Adicionais) : "Sem adicionais")</p>@if (!string.IsNullOrWhiteSpace(item.Observacao)) { <p class="item-observacao">Obs.: @item.Observacao</p> }</div></div><div class="consumo-item__value"><strong>R$ @item.Subtotal.ToString("N2", cultura)</strong><small class="sent-label">Enviado</small></div></article> } }
+            </div>
+            <footer class="comanda-summary"><p><span>Subtotal</span><strong>R$ @Model.Subtotal.ToString("N2", cultura)</strong></p><p><span>Taxa de serviço</span><strong>R$ @Model.ValorTaxaServico.ToString("N2", cultura)</strong></p><p class="grand-total"><span>Total</span><strong>R$ @Model.Total.ToString("N2", cultura)</strong></p></footer>
+            @* O envio cria um lote em Aguardando confirmação; a impressão ocorre somente após o atendente confirmá-lo no Kanban. *@
+            <form asp-action="Enviar" asp-route-slug="@Model.Slug" asp-route-mesaId="@Model.MesaId" method="post" data-enviar-cozinha data-pendentes="@pendentes.Count">@Html.AntiForgeryToken()<button class="mesa-primary mesa-primary--wide" type="submit" disabled="@(pendentes.Any() ? null : "disabled")">Enviar @pendentes.Count item(ns) para confirmação</button></form>
+        </aside>
+    </section>
+</main>
+
+<dialog class="produto-modal" data-produto-modal aria-labelledby="produto-modal-titulo">
+    <form method="dialog" class="modal-close"><button aria-label="Fechar">×</button></form>
+    <form asp-action="AdicionarItem" asp-route-slug="@Model.Slug" asp-route-mesaId="@Model.MesaId" method="post" data-item-form>
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="ProdutoId" data-modal-produto-id />
+        <p class="eyebrow" data-modal-categoria></p><h2 id="produto-modal-titulo" data-modal-nome></h2><p class="modal-price" data-modal-preco></p>
+        <div class="modal-grid"><label>Quantidade<input name="Quantidade" type="number" min="1" max="99" value="1" required data-modal-quantidade /></label><label>Observação<input name="Observacao" maxlength="500" placeholder="Ex.: sem cebola" /></label></div>
+        <section class="modal-adicionais"><div class="section-heading"><h3>Adicionais</h3><span data-adicional-contagem></span></div><label class="search-field"><span>⌕</span><input type="search" data-adicional-busca placeholder="Pesquisar adicional..." autocomplete="off" /></label><div data-adicional-resultados></div><p class="empty-state" data-adicional-vazio hidden>Não há adicionais disponíveis para este produto.</p></section>
+        <footer class="modal-footer"><strong>Total do item <span data-modal-total>R$ 0,00</span></strong><button class="mesa-primary" type="submit">Adicionar à comanda</button></footer>
+    </form>
+</dialog>
+<script src="~/js/mesas.js" asp-append-version="true"></script>

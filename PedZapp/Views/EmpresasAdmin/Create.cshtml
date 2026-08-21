@@ -1,0 +1,215 @@
+﻿@model PedZapp.ViewModels.Empresa.EmpresaCreateVM
+
+@{
+    ViewData["Title"] = "Nova Empresa";
+}
+
+<div class="container mt-5">
+
+    <div class="mb-4">
+
+        <h2>Cadastrar Empresa</h2>
+
+        <p>
+            Cadastre uma nova empresa no PedZapp
+        </p>
+
+    </div>
+
+    <div class="card shadow-sm p-4">
+
+        <form asp-action="Create">
+
+            <<div asp-validation-summary="All"
+                  class="text-danger mb-3">
+            </div>
+
+            <h4 class="mb-3">
+                Dados da Empresa
+            </h4>
+
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">
+                        Nome Fantasia
+                    </label>
+
+                    <input asp-for="NomeFantasia"
+                           class="form-control" />
+
+                    <span asp-validation-for="NomeFantasia"
+                          class="text-danger">
+                    </span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">
+                        Razão Social
+                    </label>
+
+                    <input asp-for="RazaoSocial"
+                           class="form-control" />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">
+                        CPF/CNPJ
+                    </label>
+
+                    <input asp-for="CpfCnpj"
+                           class="form-control" />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">
+                        Email
+                    </label>
+
+                    <input asp-for="Email"
+                           class="form-control" />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">
+                        Telefone
+                    </label>
+
+                    <input asp-for="Telefone"
+                           class="form-control" />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">
+                        WhatsApp
+                    </label>
+
+                    <input asp-for="WhatsApp"
+                           class="form-control" />
+                </div>
+
+            </div>
+
+            <hr class="my-4" />
+
+            <h4 class="mb-3">
+                Endereço
+            </h4>
+
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">
+                        Endereço
+                    </label>
+
+                    <input asp-for="Endereco"
+                           class="form-control" />
+                </div>
+
+                <div class="col-md-2 mb-3">
+                    <label class="form-label">
+                        Número
+                    </label>
+
+                    <input asp-for="Numero"
+                           class="form-control" />
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">
+                        Bairro
+                    </label>
+
+                    <input asp-for="Bairro"
+                           class="form-control" />
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">
+                        Cidade
+                    </label>
+
+                    <input asp-for="Cidade"
+                           class="form-control" />
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">
+                        Estado
+                    </label>
+
+                    <input asp-for="Estado"
+                           class="form-control" />
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">
+                        CEP
+                    </label>
+
+                    <input asp-for="CEP"
+                           class="form-control" />
+                </div>
+
+            </div>
+
+            <hr class="my-4" />
+
+            <h4 class="mb-3">
+                Acesso da Empresa
+            </h4>
+
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">
+                        Senha
+                    </label>
+
+                    <input asp-for="Senha"
+                           type="password"
+                           class="form-control" />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">
+                        Confirmar Senha
+                    </label>
+
+                    <input asp-for="ConfirmarSenha"
+                           type="password"
+                           class="form-control" />
+                </div>
+
+            </div>
+
+            <div class="mt-4">
+
+                <button type="submit"
+                        class="btn btn-success">
+
+                    Salvar Empresa
+
+                </button>
+
+                <a asp-action="Index"
+                   class="btn btn-secondary">
+
+                    Voltar
+
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

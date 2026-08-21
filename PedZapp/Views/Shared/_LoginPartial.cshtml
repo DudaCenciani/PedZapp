@@ -1,0 +1,33 @@
+@using Microsoft.AspNetCore.Identity
+@using PedZapp.Models
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+@if (SignInManager.IsSignedIn(User))
+{
+    @* O e-mail é obtido pelo UserManager do Identity; nenhum identificador interno ou claim sensível é exibido. *@
+    var usuario = await UserManager.GetUserAsync(User);
+    var email = usuario?.Email ?? User.Identity?.Name ?? string.Empty;
+
+    <ul class="navbar-nav pedzapp-user-header">
+        <li class="nav-item pedzapp-user-header__email" title="@email">@email</li>
+        <li class="nav-item">
+            @* O Logout permanece um POST para a Razor Page original, com antiforgery automático e returnUrl existente. *@
+            <form class="pedzapp-logout-form" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post">
+                <button type="submit" class="pedzapp-logout-button">Sair</button>
+            </form>
+        </li>
+    </ul>
+}
+else
+{
+    <ul class="navbar-nav">
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">Register</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Login</a>
+        </li>
+    </ul>
+}

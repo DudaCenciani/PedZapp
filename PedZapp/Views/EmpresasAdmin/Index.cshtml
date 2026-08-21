@@ -1,0 +1,175 @@
+﻿@model IEnumerable<PedZapp.Models.Empresa>
+
+@{
+    ViewData["Title"] = "Empresas";
+}
+
+<link rel="stylesheet" href="~/css/admin.css" />
+
+<div class="empresa-page">
+
+    <div class="empresa-header">
+
+        <div>
+            <h1>Gerenciar Empresas</h1>
+            <p>
+                Cadastre e gerencie restaurantes do sistema
+            </p>
+        </div>
+
+        <a asp-action="Create"
+           class="btn-nova-empresa">
+
+            + Nova Empresa
+
+        </a>
+
+    </div>
+
+    <div class="empresa-search-box">
+
+        <input type="text"
+               placeholder="Buscar empresas..."
+               class="empresa-search" />
+
+    </div>
+
+    <div class="empresa-total">
+        Total: <strong>@Model.Count()</strong> empresas
+    </div>
+
+    <div class="empresa-card">
+        <div class="table-responsive">
+
+        <table class="empresa-table">
+
+            <thead>
+
+                <tr>
+                    <th>Nome</th>
+                    <th>Email</th>
+                    <th>CPF/CNPJ</th>
+                    <th>Link da Loja</th>
+                    <th>Status</th>
+                    <th>Cadastro</th>
+                    <th>Ações</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                @if (Model.Any())
+                {
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+
+                            <td>
+                                <div class="empresa-info">
+
+                                    <div class="empresa-logo">
+                                        🍔
+                                    </div>
+
+                                    <div>
+                                        <strong>
+                                            @item.NomeFantasia
+                                        </strong>
+                                    </div>
+
+                                </div>
+                            </td>
+
+                            <td>
+                                @item.Email
+                            </td>
+
+                            <td>
+                                @item.CpfCnpj
+                            </td>
+
+                            <td>
+
+                                <span class="slug-badge">
+                                    /@item.Slug
+                                </span>
+
+                            </td>
+
+                            <td>
+
+                                @if (item.Ativa)
+                                {
+                                    <span class="status ativa">
+                                        Ativa
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="status inativa">
+                                        Inativa
+                                    </span>
+                                }
+
+                            </td>
+
+                            <td>
+                                @item.DataCriacao.ToString("dd/MM/yyyy")
+                            </td>
+
+                            <td>
+
+                                <div class="acoes">
+
+                                    <a asp-action="Details"
+                                       asp-route-id="@item.Id"
+                                       class="btn-acao btn-details">
+
+                                        👁
+
+                                    </a>
+
+                                    <a asp-action="Edit"
+                                       asp-route-id="@item.Id"
+                                       class="btn-acao btn-edit">
+
+                                        ✏
+
+                                    </a>
+
+                                    <a asp-action="Delete"
+                                       asp-route-id="@item.Id"
+                                       class="btn-acao btn-delete">
+
+                                        🗑
+
+                                    </a>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7"
+                            class="sem-empresa">
+
+                            Nenhuma empresa cadastrada
+
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+        </div>
+
+    </div>
+
+</div>

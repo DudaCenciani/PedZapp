@@ -1,0 +1,26 @@
+@model PedZapp.ViewModels.Cardapio.CardapioAdminViewModel
+@{ ViewData["Title"] = "Gerenciar cardápio"; var link = $"{Context.Request.Scheme}://{Context.Request.Host}/{Model.Slug}"; }
+
+<link rel="stylesheet" href="~/css/cardapio-admin.css" asp-append-version="true" />
+<main class="cardapio-admin">
+    @* Reutiliza o retorno ao painel preservando o slug do cardápio administrativo. *@
+    <partial name="_BotaoVoltarPainel" model="Model.Slug" />
+    <header>
+        <div><p>Cardápio público</p><h1>Gerenciar cardápio</h1><span class="@(Model.Publicado ? "published" : "paused")">@(Model.Publicado ? "Publicado" : "Pausado")</span></div>
+        @if (Model.Publicado)
+        {
+            <form asp-action="Pausar" asp-route-slug="@Model.Slug" method="post">@Html.AntiForgeryToken()<button class="btn cardapio-button" type="submit">Pausar cardápio</button></form>
+        }
+        else
+        {
+            <form asp-action="Publicar" asp-route-slug="@Model.Slug" method="post">@Html.AntiForgeryToken()<button class="btn cardapio-button" type="submit">Publicar cardápio</button></form>
+        }
+    </header>
+    @if (TempData["Sucesso"] is string sucesso) { <div class="cardapio-feedback">@sucesso</div> }
+    @if (!Model.Publicado) { <div class="cardapio-warning">O cardápio está pausado e não ficará disponível ao público.</div> }
+    @if (Model.TotalProdutosAtivos == 0) { <div class="cardapio-warning">Cadastre e ative ao menos um produto para exibir opções no cardápio público.</div> }
+    <section class="cardapio-admin__grid"><article><strong>@Model.TotalCategoriasAtivas</strong><span>Categorias ativas</span></article><article><strong>@Model.TotalProdutosAtivos</strong><span>Produtos ativos</span></article><article><strong>@Model.TotalAdicionaisAtivos</strong><span>Adicionais ativos</span></article></section>
+    <section class="cardapio-link"><h2>Link público</h2><input value="@link" readonly data-link aria-label="Link público do cardápio" /><div><a class="btn cardapio-button" asp-controller="Cardapio" asp-action="Index" asp-route-slug="@Model.Slug" target="_blank">Abrir cardápio</a><button type="button" class="btn cardapio-copy" data-copy>Copiar link</button><a class="btn cardapio-copy" target="_blank" href="https://wa.me/?text=@Uri.EscapeDataString(link)">Compartilhar no WhatsApp</a><a class="btn cardapio-copy" asp-action="Editor" asp-route-slug="@Model.Slug">Abrir editor</a></div></section>
+</main>
+
+@section Scripts { <script>document.querySelector('[data-copy]')?.addEventListener('click', async function () { await navigator.clipboard.writeText(document.querySelector('[data-link]').value); this.textContent = 'Link copiado'; });</script> }

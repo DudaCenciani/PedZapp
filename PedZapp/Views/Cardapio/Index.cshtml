@@ -1,0 +1,226 @@
+@using System.Globalization
+@model PedZapp.ViewModels.Cardapio.CardapioPublicoViewModel
+
+@{
+    Layout = "_CardapioPublicoLayout";
+    ViewData["Title"] = Model.NomeFantasia;
+    var cultura = new CultureInfo("pt-BR");
+}
+
+<link rel="stylesheet" href="~/css/cardapio-publico.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/cardapio-logo.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/carrinho-publico.css" asp-append-version="true" />
+@* Esta camada visual é exclusiva do cardápio público e não altera o catálogo carregado pelo controller. *@
+<link rel="stylesheet" href="~/css/cardapio-experiencia.css" asp-append-version="true" />
+@* Complementa somente a rolagem do produto e os CTAs visuais do cardápio público. *@
+<link rel="stylesheet" href="~/css/cardapio-ux.css" asp-append-version="true" />
+
+<main class="menu-publico" data-cart-root data-slug="@Model.Slug" data-cor-primaria="@Model.CorPrimaria" data-cor-secundaria="@Model.CorSecundaria">
+    @* O banner é puramente visual enquanto não há uma imagem de capa configurável por empresa. *@
+    <section class="menu-hero" aria-labelledby="menu-title">
+        <div class="menu-hero__banner" aria-hidden="true"></div>
+        <div class="menu-hero__content">
+            <div class="menu-logo menu-hero__logo">
+                @if (Model.PossuiLogo)
+                {
+                    @* O endpoint resolve a logo somente pelo slug; bytes e EmpresaId não chegam à página. *@
+                    <img src="@Url.Action("Logo", "Imagens", new { slug = Model.Slug, v = Model.LogoVersao })" alt="Logo de @Model.NomeFantasia" decoding="async" />
+                }
+                else
+                {
+                    @* O fallback evita imagem quebrada quando a empresa ainda não cadastrou uma logo. *@
+                    <span class="menu-logo__placeholder" aria-hidden="true">PZ</span>
+                }
+            </div>
+            <div class="menu-hero__identity">
+                <p class="menu-eyebrow">Cardápio online</p>
+                <h1 id="menu-title">@Model.NomeFantasia</h1>
+                @if (!string.IsNullOrWhiteSpace(Model.Descricao))
+                {
+                    <p class="menu-hero__description">@Model.Descricao</p>
+                }
+                <div class="menu-hero__meta">
+                    <span class="menu-status @(Model.AbertaAgora ? "menu-status--open" : "menu-status--closed")">@(Model.AbertaAgora ? "Aberto agora" : "Fechado agora")</span>
+                    @if (Model.PedidoMinimo.HasValue && Model.PedidoMinimo.Value > 0)
+                    {
+                        <span>Pedido mín. R$ @Model.PedidoMinimo.Value.ToString("N2", cultura)</span>
+                    }
+                </div>
+            </div>
+            @* Compartilhamento usa somente a URL pública atual, sem transmitir dados internos da empresa. *@
+            <button class="menu-share" type="button" data-share aria-label="Compartilhar cardápio">↗</button>
+        </div>
+    </section>
+
+    <section class="menu-tools" aria-label="Ferramentas do cardápio">
+        @* A pesquisa atua apenas sobre cards já projetados para este slug; não consulta nem expõe outro tenant. *@
+        <label class="menu-search">
+            <span aria-hidden="true">⌕</span>
+            <input type="search" data-menu-search placeholder="Pesquise pelo nome" aria-label="Pesquisar produtos no cardápio" autocomplete="off" />
+        </label>
+    </section>
+
+    <nav class="menu-nav" aria-label="Categorias">
+        @foreach (var categoria in Model.Categorias.Where(c => c.Produtos.Any()))
+        {
+            <a href="#categoria-@categoria.Id">@categoria.Nome</a>
+        }
+    </nav>
+
+    <p class="menu-search-empty" data-menu-search-empty hidden>Nenhum produto foi encontrado.</p>
+
+    @if (!Model.Categorias.Any())
+    {
+        <section class="menu-empty"><span aria-hidden="true">◈</span><h2>A empresa ainda não cadastrou categorias.</h2></section>
+    }
+    else
+    {
+        @foreach (var categoria in Model.Categorias)
+        {
+            @* Categorias sem produtos são omitidas da experiência principal, evitando seções sem ação para o cliente. *@
+            @if (!categoria.Produtos.Any())
+            {
+                continue;
+            }
+
+            <section class="menu-section" id="categoria-@categoria.Id" data-menu-category>
+                <header class="menu-section__header"><p class="menu-eyebrow">Cardápio</p><h2>@categoria.Nome</h2></header>
+                <div class="menu-products">
+                    @foreach (var produto in categoria.Produtos)
+                    {
+                        var preco = produto.PrecoPromocional ?? produto.Preco;
+                        var busca = $"{categoria.Nome} {produto.Nome} {produto.Descricao}".ToLowerInvariant();
+                        <article class="menu-product @(!produto.Disponivel ? "menu-product--unavailable" : string.Empty)" data-menu-product data-menu-searchable="@busca">
+                            <button class="menu-product__open" type="button" data-bs-toggle="modal" data-bs-target="#produto-@produto.Id" aria-label="Ver detalhes de @produto.Nome">
+                                <span class="menu-product__image">
+                                    @if (!string.IsNullOrWhiteSpace(produto.Imagem))
+                                    {
+                                        <img src="@produto.Imagem" alt="@produto.Nome" loading="lazy" decoding="async" data-menu-img />
+                                    }
+                                    else
+                                    {
+                                        <span class="menu-product__fallback" aria-hidden="true">◈</span>
+                                    }
+                                </span>
+                                <span class="menu-product__body">
+                                    @if (produto.Destaque)
+                                    {
+                                        <span class="menu-featured">Destaque</span>
+                                    }
+                                    @if (!produto.Disponivel)
+                                    {
+                                        @* O produto permanece visível, mas o badge informa que não pode ser comprado agora. *@
+                                        <span class="menu-product__unavailable-badge">Indisponível</span>
+                                    }
+                                    <strong class="menu-product__name">@produto.Nome</strong>
+                                    @if (!string.IsNullOrWhiteSpace(produto.Descricao))
+                                    {
+                                        <span class="menu-product__description">@produto.Descricao</span>
+                                    }
+                                    <span class="menu-product__price">
+                                        @if (produto.PrecoPromocional.HasValue)
+                                        {
+                                            <del>R$ @produto.Preco.ToString("N2", cultura)</del>
+                                        }
+                                        <b>R$ @preco.ToString("N2", cultura)</b>
+                                    </span>
+                                </span>
+                                <span class="menu-product__more" aria-hidden="true">+</span>
+                            </button>
+                        </article>
+
+                        @* O formulário mantém somente IDs de produto/adicional; o servidor continua validando empresa, preço e disponibilidade. *@
+                        <div class="modal fade" id="produto-@produto.Id" tabindex="-1" aria-labelledby="produto-titulo-@produto.Id" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                                <div class="modal-content menu-modal">
+                                    <form data-product-form data-product-id="@produto.Id" data-product-name="@produto.Nome" data-product-price="@preco.ToString(CultureInfo.InvariantCulture)" data-product-image="@produto.Imagem" data-product-available="@produto.Disponivel.ToString().ToLowerInvariant()">
+                                        <div class="modal-header"><h2 id="produto-titulo-@produto.Id">Detalhes do produto</h2><button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Fechar"></button></div>
+                                        <div class="modal-body">
+                                            <div class="menu-modal__product">
+                                                <div class="menu-modal__image">
+                                                    @if (!string.IsNullOrWhiteSpace(produto.Imagem))
+                                                    {
+                                                        <img src="@produto.Imagem" alt="@produto.Nome" decoding="async" />
+                                                    }
+                                                    else
+                                                    {
+                                                        <span aria-hidden="true">◈</span>
+                                                    }
+                                                </div>
+                                                <div><h3>@produto.Nome</h3><p>@produto.Descricao</p><div class="product-price">@if (produto.PrecoPromocional.HasValue) { <del>R$ @produto.Preco.ToString("N2", cultura)</del> } <strong>R$ @preco.ToString("N2", cultura)</strong></div></div>
+                                            </div>
+                                            @if (!produto.Disponivel)
+                                            {
+                                                <p class="menu-product__unavailable-message">Produto indisponível no momento.</p>
+                                            }
+                                            <label class="product-quantity">Quantidade <input type="number" min="1" max="99" value="1" inputmode="numeric" data-quantity aria-label="Quantidade de @produto.Nome" /></label>
+                                            @if (produto.Adicionais.Any())
+                                            {
+                                                @* A modelagem atual oferece adicionais por categoria; o card apenas os organiza sem criar regras de obrigatoriedade inexistentes. *@
+                                                <fieldset class="product-extras"><legend>Adicionais</legend><p class="product-extras__help">Escolha os itens que deseja adicionar.</p>
+                                                    @foreach (var adicional in produto.Adicionais)
+                                                    {
+                                                        <label><input type="checkbox" data-extra-id="@adicional.Id" data-extra-name="@adicional.Nome" data-extra-price="@adicional.Preco.ToString(CultureInfo.InvariantCulture)" data-extra-max="@(adicional.MaximoSelecao?.ToString() ?? string.Empty)" /><span>@adicional.Nome</span><strong>+ R$ @adicional.Preco.ToString("N2", cultura)</strong></label>
+                                                    }
+                                                </fieldset>
+                                            }
+                                            @if (produto.PermiteObservacao)
+                                            {
+                                                <label class="product-note">Observações<textarea maxlength="500" rows="4" data-note placeholder="Ex.: tirar cebola, sem molho, carne bem passada"></textarea><small>Máximo de 500 caracteres.</small></label>
+                                            }
+                                            <div class="product-total"><span>Total do item</span><strong data-product-total>R$ @preco.ToString("N2", cultura)</strong></div>
+                                        </div>
+                                        @* O CTA permanece no rodapé do modal e usa uma seta textual compatível com todos os navegadores. *@
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn menu-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                            @if (produto.Disponivel)
+                                            {
+                                                <button type="submit" class="btn menu-add"><span>Avançar</span><span aria-hidden="true">→</span></button>
+                                            }
+                                            else
+                                            {
+                                                <button type="button" class="btn menu-add" disabled aria-disabled="true"><span>Indisponível</span></button>
+                                            }
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </section>
+        }
+    }
+
+    <footer class="menu-contact">
+        @if (!string.IsNullOrWhiteSpace(Model.Telefone)) { <span>☎ @Model.Telefone</span> }
+        @if (!string.IsNullOrWhiteSpace(Model.WhatsApp)) { <span>◉ @Model.WhatsApp</span> }
+    </footer>
+</main>
+
+@* A barra inferior usa o mesmo estado local do carrinho e conserva o slug para voltar ao mesmo cardápio. *@
+<nav class="menu-bottom-nav" aria-label="Navegação do cardápio"><a href="#menu-title">⌂<span>Início</span></a><button type="button" data-cart-open>🛒<span>Carrinho</span><b data-cart-count>0</b></button></nav>
+<button class="cart-trigger" type="button" data-cart-open aria-controls="cart-drawer" aria-label="Abrir carrinho"><span aria-hidden="true">🛒</span><span>Carrinho <b data-cart-count>0</b> · <b data-cart-subtotal>R$ 0,00</b></span></button>
+<div class="cart-backdrop" data-cart-backdrop hidden></div>
+<aside class="cart-drawer" id="cart-drawer" data-cart-drawer aria-label="Seu carrinho" aria-hidden="true" tabindex="-1">
+    <header class="cart-drawer__header"><div><p>Seu pedido</p><h2>← Carrinho</h2></div><div class="cart-drawer__actions"><button type="button" data-cart-clear>Limpar</button><button type="button" data-cart-close aria-label="Fechar carrinho">×</button></div></header>
+    <div class="cart-layout">
+        <section class="cart-items" data-cart-items aria-live="polite"></section>
+        <footer class="cart-summary">
+            <h3>Resumo do pedido</h3>
+            <div class="cart-summary__row"><span>Subtotal</span><strong data-cart-drawer-subtotal>R$ 0,00</strong></div>
+            <p class="cart-summary__notice">Taxas e descontos, quando aplicáveis, serão confirmados no checkout.</p>
+            <section class="cart-suggestions" data-cart-suggestions hidden><h4>Peça também</h4><div data-cart-suggestion-list></div></section>
+            <a class="cart-continue" asp-controller="Cardapio" asp-action="Index" asp-route-slug="@Model.Slug">Adicionar mais produtos</a>
+            @* O CTA conserva o slug e mostra total e seta apenas como orientação visual para o checkout existente. *@
+            <a class="cart-checkout" asp-controller="Checkout" asp-action="Index" asp-route-slug="@Model.Slug"><span>Avançar</span><strong data-cart-drawer-total>R$ 0,00</strong><span aria-hidden="true">→</span></a>
+        </footer>
+    </div>
+</aside>
+
+@* Após incluir um item, esta confirmação visual permite seguir para o carrinho ou permanecer no mesmo cardápio. *@
+<div class="modal fade" id="item-adicionado" tabindex="-1" aria-labelledby="item-adicionado-titulo" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered"><div class="modal-content menu-added-modal"><div class="modal-body"><span class="menu-added-modal__icon" aria-hidden="true">✓</span><h2 id="item-adicionado-titulo"><span data-added-name>Produto</span> adicionado ao carrinho!</h2><div class="menu-added-modal__quantity"><span>Quantidade</span><div><button type="button" data-added-action="decrease" aria-label="Diminuir quantidade">−</button><strong data-added-quantity>1</strong><button type="button" data-added-action="increase" aria-label="Aumentar quantidade">+</button></div></div><label>Observações<textarea rows="3" maxlength="500" data-added-note placeholder="Adicionar ou ajustar observações"></textarea></label></div><div class="modal-footer"><button type="button" class="btn menu-secondary" data-bs-dismiss="modal">Continuar comprando</button><button type="button" class="btn menu-add" data-added-go-cart>Avançar para o carrinho</button></div></div></div>
+</div>
+
+@section Scripts { <script src="~/js/cardapio-carrinho.js" asp-append-version="true"></script> }

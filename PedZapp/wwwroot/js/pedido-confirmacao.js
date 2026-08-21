@@ -1,0 +1,1 @@
+(() => { const root = document.querySelector('[data-confirmacao-pedido]'); if (!root) return; localStorage.removeItem(`pedzapp-carrinho-${root.dataset.slug}`); localStorage.removeItem(`pedzapp-checkout-${root.dataset.slug}`); })();

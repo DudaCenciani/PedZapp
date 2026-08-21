@@ -1,0 +1,113 @@
+@model PedZapp.ViewModels.PainelEmpresa.DashboardEmpresaVM
+@inject IWebHostEnvironment Ambiente
+
+@{
+    ViewData["Title"] = "Painel da Empresa";
+}
+
+<link rel="stylesheet" href="~/css/painel-empresa.css" asp-append-version="true" />
+@* Estilos exclusivos do bloco dinâmico de pendências, sem alterar atalhos ou indicadores existentes. *@
+<link rel="stylesheet" href="~/css/painel-pendencias.css" asp-append-version="true" />
+@* Reutiliza somente o componente visual de aviso; os demais estilos do dashboard permanecem inalterados. *@
+<link rel="stylesheet" href="~/css/pedidos-realtime.css" asp-append-version="true" />
+
+<main class="empresa-dashboard" data-pedidos-realtime data-realtime-slug="@Model.Slug" data-realtime-page="painel">
+    <header class="empresa-dashboard__header">
+        <div>
+            <p class="eyebrow">Painel administrativo</p>
+            <h1>Olá, @Model.NomeFantasia 👋</h1>
+            @* O status vem do serviço compartilhado e reflete publicação, pausa, empresa ativa e horário atual. *@
+            <span class="status loja-status @(Model.LojaAberta ? "loja-status--open" : "loja-status--closed")">@(Model.LojaAberta ? "🟢 Loja aberta" : "🔴 Loja fechada")</span>
+            <p class="subtitle">Acompanhe sua operação e gerencie sua empresa</p>
+        </div>
+        <div class="header-meta">
+            <div class="badges">
+                <span class="status @(Model.Ativa ? "positive" : "warning")">@(Model.Ativa ? "Empresa ativa" : "Empresa inativa")</span>
+                <span class="status @(Model.PlanoAtivo ? "positive" : "warning")">@(Model.PlanoAtivo ? "Plano ativo" : "Plano inativo")</span>
+            </div>
+            <span class="slug">/@Model.Slug</span>
+        </div>
+    </header>
+
+    @if (!Model.Ativa || !Model.PlanoAtivo)
+    {
+        <section class="alert-card"><strong>Atenção:</strong>
+            @if (!Model.Ativa && !Model.PlanoAtivo) { <span>Sua empresa e seu plano estão inativos.</span> }
+            else if (!Model.Ativa) { <span>Sua empresa está inativa.</span> }
+            else { <span>Seu plano está inativo.</span> }
+        </section>
+    }
+
+    <section aria-labelledby="indicadores-title">
+        <div class="section-title"><p class="eyebrow">Visão geral</p><h2 id="indicadores-title">Indicadores principais</h2></div>
+        <div class="metric-grid">
+            <article class="metric"><span>◷</span><div><p>Pedidos hoje</p><strong>@Model.PedidosHoje</strong><small>Pedidos recebidos hoje</small></div></article>
+            <article class="metric"><span>R$</span><div><p>Vendas hoje</p><strong>R$ @Model.VendasHoje.ToString("N2")</strong><small>Pedidos não cancelados</small></div></article>
+            <article class="metric"><span>↻</span><div><p>Pedidos em andamento</p><strong>@Model.PedidosEmAndamento</strong><small>Pedidos ativos</small></div></article>
+            <article class="metric"><span>⌁</span><div><p>Ticket médio</p><strong>R$ @Model.TicketMedio.ToString("N2")</strong><small>Pedidos não cancelados</small></div></article>
+        </div>
+    </section>
+
+    @* Os atalhos seguem diretamente os indicadores após a remoção do resumo financeiro exclusivo deste painel. *@
+    <section aria-labelledby="acessos-title">
+        <div class="section-title"><p class="eyebrow">Atalhos</p><h2 id="acessos-title">Acessos rápidos</h2></div>
+        <div class="quick-grid">
+            @* Cada atalho reutiliza o slug já validado pelo painel e aponta somente para módulos existentes. *@
+            <a asp-controller="Pedidos" asp-action="Index" asp-route-slug="@Model.Slug" class="quick"><span aria-hidden="true">◷</span><h3>Pedidos <span class="pedidos-realtime-badge" data-pedidos-new-badge hidden aria-label="Pedidos novos não visualizados"></span></h3><small>Acompanhe @Model.PedidosHoje pedido@(Model.PedidosHoje == 1 ? string.Empty : "s") de hoje</small></a>
+            <a asp-controller="Pedidos" asp-action="Novo" asp-route-slug="@Model.Slug" class="quick"><span aria-hidden="true">＋</span><h3>Novo pedido manual</h3><small>Registre um pedido de balcão ou telefone</small></a>
+            <a asp-controller="CardapioAdmin" asp-action="Index" asp-route-slug="@Model.Slug" class="quick"><span aria-hidden="true">▤</span><h3>Cardápio</h3><small>Publique e organize seu cardápio</small></a>
+            <a asp-controller="Produtos" asp-action="Index" asp-route-slug="@Model.Slug" class="quick"><span aria-hidden="true">◈</span><h3>Produtos</h3><small>@Model.TotalProdutos produtos cadastrados</small></a>
+            <a asp-controller="Categorias" asp-action="Index" asp-route-slug="@Model.Slug" class="quick"><span aria-hidden="true">▦</span><h3>Categorias</h3><small>@Model.TotalCategorias categorias cadastradas</small></a>
+            <a asp-controller="Mesas" asp-action="Index" asp-route-slug="@Model.Slug" class="quick"><span aria-hidden="true">▤</span><h3>Mesas e comandas</h3><small>@Model.TotalMesasOcupadas mesa@(Model.TotalMesasOcupadas == 1 ? string.Empty : "s") ocupada@(Model.TotalMesasOcupadas == 1 ? string.Empty : "s")</small></a>
+            <a asp-controller="Adicionais" asp-action="Index" asp-route-slug="@Model.Slug" class="quick"><span aria-hidden="true">＋</span><h3>Adicionais</h3><small>Gerencie complementos do cardápio</small></a>
+            <a asp-controller="Entregas" asp-action="Index" asp-route-slug="@Model.Slug" class="quick"><span aria-hidden="true">⌖</span><h3>Entregas e taxas</h3><small>@Model.TotalBairrosEntregaAtivos bairro@(Model.TotalBairrosEntregaAtivos == 1 ? string.Empty : "s") ativo@(Model.TotalBairrosEntregaAtivos == 1 ? string.Empty : "s")</small></a>
+            <a asp-controller="FormasPagamento" asp-action="Index" asp-route-slug="@Model.Slug" class="quick"><span aria-hidden="true">¤</span><h3>Formas de pagamento</h3><small>@Model.TotalFormasPagamentoAtivas opções ativas</small></a>
+            <a asp-controller="Horarios" asp-action="Index" asp-route-slug="@Model.Slug" class="quick"><span aria-hidden="true">◴</span><h3>Horários</h3><small>Defina quando aceita pedidos</small></a>
+            <a asp-controller="Relatorios" asp-action="Index" asp-route-slug="@Model.Slug" class="quick"><span aria-hidden="true">↗</span><h3>Relatórios</h3><small>Visualize vendas e indicadores</small></a>
+            <a asp-controller="ConfiguracoesEmpresa" asp-action="Index" asp-route-slug="@Model.Slug" class="quick"><span aria-hidden="true">⚙</span><h3>Configurações</h3><small>Atualize dados da empresa</small></a>
+        </div>
+    </section>
+
+    @if (Ambiente.IsDevelopment())
+    {
+        @* O teste usa o mesmo Hub e grupo da empresa, mas a action só funciona em Development e não cria pedido no banco. *@
+        <form class="pedido-realtime-test" data-pedidos-realtime-test asp-controller="Pedidos" asp-action="TesteAviso" asp-route-slug="@Model.Slug" method="post">
+            @Html.AntiForgeryToken()
+            <button type="submit">🔔 Testar aviso de pedido</button>
+        </form>
+    }
+
+    <section class="dashboard-split bottom">
+        <article class="info-card empty-orders"><span>◷</span><p class="eyebrow">Pedidos recentes</p><h2>Consulte seus pedidos</h2><p>Acompanhe pedidos novos, em preparo e finalizados na página de pedidos.</p><a asp-controller="Pedidos" asp-action="Index" asp-route-slug="@Model.Slug">Ver pedidos →</a></article>
+        @* As pendências são calculadas no serviço com EmpresaId já autorizado; a View somente apresenta o resultado resumido. *@
+        <article class="info-card pending-actions">
+            <p class="eyebrow">Ações pendentes</p>
+            @if (Model.Pendencias.Total == 0)
+            {
+                <div class="pending-actions__empty"><span aria-hidden="true">✓</span><div><h2>Nenhuma pendência no momento.</h2><p>Tudo certo por aqui.</p></div></div>
+            }
+            else
+            {
+                <h2>@Model.Pendencias.Total pendência@(Model.Pendencias.Total == 1 ? string.Empty : "s") encontrada@(Model.Pendencias.Total == 1 ? string.Empty : "s")</h2>
+                <div class="pending-actions__list">
+                    @foreach (var pendencia in Model.Pendencias.Pendencias)
+                    {
+                        <section class="pending-actions__item pending-actions__item--@pendencia.Prioridade.ToString().ToLowerInvariant()">
+                            <div><h3>@pendencia.Titulo</h3><p>@pendencia.Descricao</p></div>
+                            <a href="@pendencia.UrlResolucao">@pendencia.TextoBotao <span aria-hidden="true">→</span></a>
+                        </section>
+                    }
+                </div>
+                @if (Model.Pendencias.OutrasPendencias > 0)
+                {
+                    <p class="pending-actions__more">+ @Model.Pendencias.OutrasPendencias outra@(Model.Pendencias.OutrasPendencias == 1 ? string.Empty : "s") pendência@(Model.Pendencias.OutrasPendencias == 1 ? string.Empty : "s").</p>
+                }
+            }
+        </article>
+    </section>
+</main>
+@section Scripts {
+    @* A conexão autenticada recebe apenas eventos do grupo que o servidor autorizou para esta empresa. *@
+    <script src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@8.0.7/dist/browser/signalr.min.js" crossorigin="anonymous"></script>
+    <script src="~/js/pedidos-realtime.js" asp-append-version="true"></script>
+}

@@ -1,0 +1,61 @@
+@using PedZapp.Enums
+@using System.Globalization
+@model PedZapp.ViewModels.Pedido.PedidosIndexViewModel
+@{ ViewData["Title"] = "Pedidos"; var cultura = new CultureInfo("pt-BR"); var fluxoSimplificado = Model.TipoFluxoPedido == TipoFluxoPedido.Simplificado; var colunas = fluxoSimplificado ? new[] { StatusPedido.Novo, StatusPedido.EmPreparo, StatusPedido.Entregue, StatusPedido.Cancelado } : Enum.GetValues<StatusPedido>(); var exibindoHoje = Model.DataInicial?.Date == DateTime.UtcNow.Date; }
+<link rel="stylesheet" href="~/css/pedidos.css" asp-append-version="true" />
+@* Estilos do aviso em tempo real são isolados para não alterar os cartões e filtros já existentes. *@
+<link rel="stylesheet" href="~/css/pedidos-realtime.css" asp-append-version="true" />
+<main class="pedidos-page" data-pedidos-realtime data-realtime-slug="@Model.Slug" data-realtime-page="pedidos" data-realtime-exibindo-hoje="@exibindoHoje.ToString().ToLowerInvariant()" data-realtime-pedidos-hoje-url="@Url.Action("Index", "Pedidos", new { slug = Model.Slug })">
+    @* Reutiliza o retorno visual comum, mantendo o slug do pedido administrativo. *@
+    <partial name="_BotaoVoltarPainel" model="Model.Slug" />
+    <header class="pedidos-header">
+        <div><p>Operação · @Model.Slug</p><h1>Pedidos <span class="pedidos-realtime-badge" data-pedidos-new-badge hidden aria-label="Pedidos novos não visualizados"></span></h1><span>Acompanhe e gerencie os pedidos da sua empresa</span></div>
+        <a class="btn-novo-pedido" asp-action="Novo" asp-route-slug="@Model.Slug"><span aria-hidden="true">+</span> Novo pedido manual</a>
+    </header>
+    @if (TempData["Sucesso"] is string sucesso) { <div class="pedidos-feedback" role="status">@sucesso</div> }
+    @if (TempData["Erro"] is string erro) { <div class="pedidos-error" role="alert">@erro</div> }
+    <section class="pedidos-metrics"><article><strong>@Model.TotalHoje</strong><span>Pedidos hoje</span></article><article><strong>@Model.TotalNovos</strong><span>@(fluxoSimplificado ? "Aguardando confirmação" : "Novos")</span></article><article><strong>@Model.TotalEmPreparo</strong><span>Em preparo</span></article><article><strong>@Model.TotalFinalizados</strong><span>Finalizados</span></article></section>
+    @* dataInicial é o único campo de data ligado ao controller; o antigo fim de período foi removido para manter a operação diária. *@
+    <form class="pedidos-filters pedidos-toolbar" method="get" asp-action="Index" asp-route-slug="@Model.Slug"><input name="busca" value="@Model.Busca" placeholder="Número, cliente ou telefone" aria-label="Buscar pedido" /><select name="status" aria-label="Filtrar por status"><option value="">Todos os status</option>@foreach (var item in colunas) { <option value="@item" selected="@(Model.Status == item)">@StatusTexto(item, fluxoSimplificado)</option> }</select><input type="date" name="dataInicial" value="@Model.DataInicial?.ToString("yyyy-MM-dd")" aria-label="Data do pedido" /><button type="submit">Atualizar</button></form>
+    <p class="pedidos-periodo">Exibindo: <strong>@Model.PeriodoExibicao</strong></p>
+    @if (!Model.Pedidos.Any()) { <p class="pedidos-empty-day">Nenhum pedido encontrado para @Model.PeriodoExibicao.ToLowerInvariant().</p> }
+    <section class="pedidos-kanban kanban-board" aria-label="Quadro de pedidos">
+        @foreach (var status in colunas)
+        {
+            var pedidos = Model.Pedidos.Where(p => p.Status == status).ToList();
+            <section class="pedido-column kanban-column pedido-column--@status.ToString().ToLowerInvariant()"><header class="kanban-column-header"><h2>@StatusTexto(status, fluxoSimplificado)</h2><span aria-label="@pedidos.Count pedidos">@pedidos.Count</span></header>
+                <div class="kanban-column-body">
+                    @if (!pedidos.Any()) { <p class="pedido-empty">Nenhum pedido neste status.</p> }
+                    @foreach (var pedido in pedidos)
+                    {
+                        <article class="pedido-card">
+                            <div class="pedido-card__head pedido-card-header"><strong>#@pedido.NumeroPedido</strong><span class="pedido-status pedido-status--@pedido.Status.ToString().ToLowerInvariant()">@StatusTexto(pedido.Status, fluxoSimplificado)</span></div>
+                            <h3>@pedido.NomeCliente</h3>
+                            @if (pedido.TipoAtendimento == TipoAtendimento.Mesa)
+                            {
+                                @* Identifica o lote presencial sem consultar outra empresa: os campos foram projetados do pedido filtrado por EmpresaId. *@
+                                <p class="pedido-card-meta"><small>Mesa: @pedido.NomeMesa · Comanda: @pedido.NumeroComanda</small>@if (!string.IsNullOrWhiteSpace(pedido.NomeFuncionario)) { <small>Garçom: @pedido.NomeFuncionario</small> }</p>
+                            }
+                            <div class="pedido-card-meta"><small>@pedido.DataCriacao.ToLocalTime().ToString("HH:mm") · @(pedido.TipoAtendimento == TipoAtendimento.Entrega ? "Entrega" : pedido.TipoAtendimento == TipoAtendimento.Mesa ? "Mesa" : "Retirada")</small><small>@pedido.QuantidadeItens item@(pedido.QuantidadeItens == 1 ? string.Empty : "ns") · <span class="pedido-payment @(pedido.Pago ? "pedido-payment--paid" : "pedido-payment--pending")">@(pedido.Pago ? "Pago" : "Pendente")</span></small></div>
+                            <p class="pedido-card-total"><strong>R$ @pedido.Total.ToString("N2", cultura)</strong><span>@pedido.FormaPagamento</span></p>
+                            <div class="pedido-card__actions pedido-card-actions"><a asp-action="Detalhes" asp-route-slug="@Model.Slug" asp-route-id="@pedido.Id"><span aria-hidden="true">↗</span> Ver detalhes</a>@if (PodeAvancar(pedido.Status)) { <form asp-action="Avancar" asp-route-slug="@Model.Slug" asp-route-id="@pedido.Id" method="post">@Html.AntiForgeryToken()<button type="submit"><span aria-hidden="true">✓</span> @ProximaAcao(pedido.Status, pedido.TipoAtendimento, fluxoSimplificado)</button></form> }@if (PodeCancelar(pedido.Status)) { <form asp-action="Cancelar" asp-route-slug="@Model.Slug" asp-route-id="@pedido.Id" method="post">@Html.AntiForgeryToken()<button class="pedido-cancel" type="submit"><span aria-hidden="true">×</span> Cancelar</button></form> }</div>
+                        </article>
+                    }
+                </div>
+            </section>
+        }
+    </section>
+</main>
+<script src="~/js/pedido-impressao.js" asp-append-version="true"></script>
+@section Scripts {
+    @* Cliente oficial do SignalR; o Hub ainda exige a validação de sessão, slug e EmpresaId no servidor. *@
+    <script src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@8.0.7/dist/browser/signalr.min.js" crossorigin="anonymous"></script>
+    @* Mantém os avisos, o som opcional e a reconexão fora da lógica de pedidos da View. *@
+    <script src="~/js/pedidos-realtime.js" asp-append-version="true"></script>
+}
+@functions {
+    private static string StatusTexto(StatusPedido status, bool simplificado) => status switch { StatusPedido.Novo when simplificado => "Aguardando confirmação", StatusPedido.Novo => "Novos", StatusPedido.Confirmado => "Confirmados", StatusPedido.EmPreparo => "Em preparo", StatusPedido.Pronto => "Prontos", StatusPedido.SaiuParaEntrega => "Saiu para entrega", StatusPedido.Entregue when simplificado => "Finalizados", StatusPedido.Entregue => "Entregues", _ => "Cancelados" };
+    private static bool PodeAvancar(StatusPedido status) => status is not StatusPedido.Entregue and not StatusPedido.Cancelado;
+    private static bool PodeCancelar(StatusPedido status) => status is not StatusPedido.Entregue and not StatusPedido.Cancelado;
+    private static string ProximaAcao(StatusPedido status, TipoAtendimento tipo, bool simplificado) => simplificado ? status switch { StatusPedido.Novo => "Confirmar pedido", StatusPedido.EmPreparo => "Finalizar pedido", _ => "Avançar" } : status switch { StatusPedido.Novo => "Confirmar", StatusPedido.Confirmado => "Preparar", StatusPedido.EmPreparo => "Marcar pronto", StatusPedido.Pronto when tipo == TipoAtendimento.Entrega => "Saiu para entrega", StatusPedido.Pronto => "Finalizar", _ => "Entregar" };
+}

@@ -1,0 +1,80 @@
+/* ==================================================
+   Estrutura do modal de detalhes do produto
+   Mantém header/footer fixos e conteúdo central rolável
+   ================================================== */
+.modal-dialog.modal-dialog-scrollable {
+    height: min(90dvh, 820px);
+}
+
+.menu-modal {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-height: 100%;
+    min-height: 0;
+}
+
+/* O form envolve header, conteúdo e CTA; por isso também precisa participar da coluna flex do modal. */
+.menu-modal > [data-product-form] {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.menu-modal .modal-header,
+.menu-modal .modal-footer {
+    background: #fff;
+    flex: 0 0 auto;
+    z-index: 1;
+}
+
+.menu-modal .modal-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+/* O rodapé permanece fora da área rolável para manter o avanço sempre disponível. */
+.menu-modal .modal-footer {
+    border-top: 1px solid #eee8e1;
+    box-shadow: 0 -5px 14px rgba(37, 37, 37, .035);
+}
+
+.menu-modal .menu-add {
+    align-items: center;
+    display: inline-flex;
+    justify-content: space-between;
+}
+
+/* ==================================================
+   CTA do carrinho
+   ================================================== */
+.cart-summary .cart-checkout {
+    gap: .45rem;
+}
+
+.cart-summary .cart-checkout > strong {
+    margin-left: auto;
+}
+
+@media (max-width: 700px) {
+    .modal-dialog.modal-dialog-scrollable {
+        height: calc(100dvh - 1rem);
+        margin: .5rem;
+    }
+
+    .menu-modal {
+        max-height: 100%;
+    }
+
+    /* Adicionais ficam compactos para deixar mais conteúdo visível sem diminuir a área de toque. */
+    .product-extras {
+        padding: .75rem;
+    }
+
+    .product-extras label {
+        padding: .55rem .65rem;
+    }
+}

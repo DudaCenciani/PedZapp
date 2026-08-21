@@ -1,0 +1,62 @@
+/* ==================================================
+   Usuário autenticado e botão de saída
+   ================================================== */
+.pedzapp-user-header {
+    align-items: center;
+    flex-direction: row;
+    gap: .7rem;
+}
+
+/* O endereço é somente uma referência visual; ellipsis evita expansão horizontal em telas pequenas. */
+.pedzapp-user-header__email {
+    color: #6d6760;
+    font-size: .86rem;
+    max-width: min(34vw, 290px);
+    overflow: hidden;
+    padding: .45rem 0;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* O botão preserva o formulário POST do Identity e aplica a paleta dourada já usada no PedZapp. */
+.pedzapp-logout-form {
+    margin: 0;
+}
+
+.pedzapp-logout-button {
+    background: #f6c445;
+    border: 1px solid #e0ae25;
+    border-radius: 10px;
+    color: #3f3003;
+    font: inherit;
+    font-size: .87rem;
+    font-weight: 800;
+    min-height: 36px;
+    padding: .42rem .8rem;
+    transition: background-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+
+.pedzapp-logout-button:hover {
+    background: #f8cf5d;
+    box-shadow: 0 5px 13px rgba(201, 141, 134, .18);
+    transform: translateY(-1px);
+}
+
+.pedzapp-logout-button:focus-visible {
+    outline: 3px solid #c98d86;
+    outline-offset: 3px;
+}
+
+/* No menu móvel, e-mail e ação continuam alinhados e sem ultrapassar a largura disponível. */
+@media (max-width: 575px) {
+    .navbar-collapse .pedzapp-user-header {
+        align-items: center;
+        justify-content: space-between;
+        padding: .5rem 0;
+        width: 100%;
+    }
+
+    .pedzapp-user-header__email {
+        max-width: calc(100vw - 126px);
+    }
+}

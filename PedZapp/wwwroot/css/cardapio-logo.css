@@ -1,0 +1,36 @@
+/* Moldura responsiva para a logo binária ou seu fallback, sem imagem fixa no servidor. */
+.menu-publico .menu-logo {
+    align-items: center;
+    background: #fff6da;
+    border: 1px solid #eadba9;
+    border-radius: 18px;
+    display: flex;
+    flex: 0 0 6rem;
+    font-size: 1.5rem;
+    height: 6rem;
+    justify-content: center;
+    overflow: hidden;
+    width: 6rem;
+}
+
+/* A contenção evita distorção quando cada empresa utiliza proporções de logo diferentes. */
+.menu-publico .menu-logo img {
+    height: 100%;
+    object-fit: contain;
+    padding: .45rem;
+    width: 100%;
+}
+
+/* O fallback ocupa a mesma área e impede que o cliente veja uma imagem quebrada. */
+.menu-publico .menu-logo__placeholder {
+    color: #9d710e;
+}
+
+/* Em celulares a moldura reduz sem comprometer a leitura do cabeçalho. */
+@media (max-width: 700px) {
+    .menu-publico .menu-logo {
+        flex-basis: 5rem;
+        height: 5rem;
+        width: 5rem;
+    }
+}

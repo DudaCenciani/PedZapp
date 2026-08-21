@@ -1,0 +1,37 @@
+﻿@model PedZapp.Models.Empresa
+
+<h2>Excluir Empresa</h2>
+
+<h4>
+    Tem certeza que deseja excluir
+    essa empresa?
+</h4>
+
+<hr />
+
+<p>
+    <strong>
+        @Model.NomeFantasia
+    </strong>
+</p>
+
+<p>
+    @Model.Email
+</p>
+
+<form asp-action="Delete">
+
+    <input type="hidden"
+           asp-for="Id" />
+
+    <button type="submit"
+            class="btn btn-danger">
+        Excluir
+    </button>
+
+    <a asp-action="Index"
+       class="btn btn-secondary">
+        Cancelar
+    </a>
+
+</form>

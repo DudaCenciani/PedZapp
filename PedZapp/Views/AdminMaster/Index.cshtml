@@ -1,0 +1,153 @@
+﻿@model PedZapp.ViewModels.AdminMaster.DashboardVM
+@{
+    ViewData["Title"] = "Admin Master";
+}
+
+<link rel="stylesheet" href="~/css/adminmaster.css" />
+
+<div class="admin-dashboard">
+
+    <div class="welcome-section">
+        <div>
+        
+            <p>
+                Bem-vinda ao painel master do PedZapp
+            </p>
+        </div>
+
+        <div class="profile-circle">
+            M
+        </div>
+    </div>
+
+    <!-- Cards estatísticas -->
+    <div class="stats-grid">
+
+        <div class="stat-card">
+            <div class="stat-icon yellow">
+                🏢
+            </div>
+
+            <div class="stat-info">
+                @Model.TotalEmpresas
+                <span>Empresas cadastradas</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon green">
+                ✅
+            </div>
+
+            <div class="stat-info">
+                <h2>@Model.EmpresasAtivas</h2>
+                <span>Empresas ativas</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon pink">
+                📦
+            </div>
+
+            <div class="stat-info">
+                <h2>0</h2>
+                <span>Pedidos do dia</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon gold">
+                💰
+            </div>
+
+            <div class="stat-info">
+                <h2>R$ 0,00</h2>
+                <span>Receita mensal</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Área principal -->
+    <div class="menu-grid">
+
+        <a asp-controller="EmpresasAdmin"
+           asp-action="Index"
+           class="menu-card">
+
+            <div class="menu-icon blue">
+                🏢
+            </div>
+
+            <h3>Gerenciar Empresas</h3>
+
+            <p>
+                Cadastre e gerencie empresas
+            </p>
+
+        </a>
+
+        <div class="menu-card disabled">
+            <div class="menu-icon purple">
+                💎
+            </div>
+
+            <h3>Planos</h3>
+
+            <p>
+                Gerencie assinaturas
+            </p>
+        </div>
+
+        <div class="menu-card disabled">
+            <div class="menu-icon green">
+                📊
+            </div>
+
+            <h3>Dashboard Geral</h3>
+
+            <p>
+                Relatórios do sistema
+            </p>
+        </div>
+
+        <div class="menu-card disabled">
+            <div class="menu-icon yellow">
+                💰
+            </div>
+
+            <h3>Financeiro</h3>
+
+            <p>
+                Receitas e pagamentos
+            </p>
+        </div>
+
+        <div class="menu-card disabled">
+            <div class="menu-icon pink">
+                🎧
+            </div>
+
+            <h3>Suporte</h3>
+
+            <p>
+                Atendimento às empresas
+            </p>
+        </div>
+
+        <div class="menu-card disabled">
+            <div class="menu-icon gray">
+                ⚙️
+            </div>
+
+            <h3>Configurações</h3>
+
+            <p>
+                Configurações gerais
+            </p>
+        </div>
+
+    </div>
+
+</div>

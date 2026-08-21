@@ -1,0 +1,8 @@
+@using System.Globalization
+@model PedZapp.ViewModels.Pedido.PedidoConfirmacaoPublicaViewModel
+@{ Layout = "_CardapioPublicoLayout"; ViewData["Title"] = "Pedido recebido"; var cultura = new CultureInfo("pt-BR"); }
+<link rel="stylesheet" href="~/css/pedido-confirmacao.css" asp-append-version="true" />
+<main class="pedido-confirmacao" data-confirmacao-pedido data-slug="@Model.Slug">
+    <section><span aria-hidden="true">✓</span><p>@Model.NomeFantasia</p><h1>Pedido recebido!</h1><p>Seu pedido foi registrado e a loja poderá confirmá-lo em breve.</p><dl><div><dt>Número do pedido</dt><dd>#@Model.NumeroPedido</dd></div><div><dt>Atendimento</dt><dd>@Model.TipoAtendimento</dd></div><div><dt>Pagamento</dt><dd>@Model.FormaPagamento</dd></div><div><dt>Total</dt><dd>R$ @Model.Total.ToString("N2", cultura)</dd></div></dl><a asp-controller="Cardapio" asp-action="Index" asp-route-slug="@Model.Slug">Voltar ao cardápio</a></section>
+</main>
+@section Scripts { <script src="~/js/pedido-confirmacao.js" asp-append-version="true"></script> }

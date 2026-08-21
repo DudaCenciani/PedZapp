@@ -1,0 +1,211 @@
+/* Página isolada: substitui apenas o entorno padrão do Identity quando o cartão de Login está presente. */
+body:has(.pedzapp-login-page) {
+    background: #f8f7f5;
+}
+
+body:has(.pedzapp-login-page) header,
+body:has(.pedzapp-login-page) footer {
+    display: none;
+}
+
+body:has(.pedzapp-login-page) .container:has(.pedzapp-login-page) {
+    max-width: none;
+    padding: 0;
+    width: 100%;
+}
+
+/* Estrutura centralizada, com o mesmo off-white e os tons dourados usados nas telas administrativas. */
+.pedzapp-login-page {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+}
+
+.pedzapp-login-card {
+    background: #fff;
+    border: 1px solid #ebe7e1;
+    border-radius: 22px;
+    box-shadow: 0 16px 40px rgba(37, 37, 37, .09);
+    max-width: 450px;
+    padding: clamp(1.75rem, 5vw, 2.75rem);
+    width: 100%;
+}
+
+/* Marca, título e texto criam uma hierarquia leve antes dos campos de acesso. */
+.pedzapp-login-brand {
+    color: #9d710e;
+    font-size: .82rem;
+    font-weight: 850;
+    letter-spacing: .15em;
+}
+
+.pedzapp-login-intro {
+    margin: .85rem 0 1.8rem;
+}
+
+.pedzapp-login-eyebrow {
+    color: #c98d86;
+    font-size: .75rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    margin: 0 0 .45rem;
+    text-transform: uppercase;
+}
+
+.pedzapp-login-intro h1 {
+    color: #252525;
+    font-size: clamp(1.6rem, 4vw, 2rem);
+    font-weight: 800;
+    letter-spacing: -.02em;
+    margin: 0;
+}
+
+.pedzapp-login-intro > p:last-child {
+    color: #727272;
+    margin: .55rem 0 0;
+}
+
+/* Campos claros, altos e com foco dourado preservam os atributos originais do model binding. */
+.pedzapp-login-field {
+    margin-bottom: 1.05rem;
+}
+
+.pedzapp-login-field label {
+    color: #252525;
+    display: block;
+    font-size: .9rem;
+    font-weight: 750;
+    margin-bottom: .45rem;
+}
+
+.pedzapp-login-field .form-control {
+    background: #fffdf8;
+    border: 1px solid #ded8ce;
+    border-radius: 12px;
+    box-shadow: none;
+    color: #252525;
+    min-height: 50px;
+    padding: .75rem .9rem;
+}
+
+.pedzapp-login-field .form-control:focus {
+    background: #fff;
+    border-color: #f6c445;
+    box-shadow: 0 0 0 .22rem rgba(246, 196, 69, .2);
+}
+
+.pedzapp-login-validation {
+    color: #a74941;
+    display: block;
+    font-size: .82rem;
+    margin-top: .4rem;
+}
+
+.pedzapp-login-validation:empty {
+    display: none;
+}
+
+/* Lembrete e ação principal oferecem área de toque confortável, sem o azul padrão do Bootstrap. */
+.pedzapp-login-remember {
+    align-items: center;
+    color: #565656;
+    display: flex;
+    font-size: .9rem;
+    gap: .55rem;
+    margin: 1.25rem 0;
+}
+
+.pedzapp-login-remember .form-check-input {
+    border-color: #c8bfb3;
+    height: 1.05rem;
+    margin: 0;
+    width: 1.05rem;
+}
+
+.pedzapp-login-remember .form-check-input:checked {
+    background-color: #f6c445;
+    border-color: #d3a21b;
+}
+
+.pedzapp-login-submit {
+    background: #f6c445;
+    border: 1px solid #e0ae25;
+    border-radius: 12px;
+    color: #252525;
+    font-size: .98rem;
+    font-weight: 800;
+    min-height: 52px;
+    transition: background-color .18s ease, box-shadow .18s ease, transform .18s ease;
+    width: 100%;
+}
+
+.pedzapp-login-submit:hover {
+    background: #f8cf5d;
+    box-shadow: 0 7px 15px rgba(201, 141, 134, .18);
+    transform: translateY(-1px);
+}
+
+.pedzapp-login-submit:focus-visible,
+.pedzapp-login-links a:focus-visible,
+.pedzapp-login-provider:focus-visible {
+    outline: 3px solid rgba(246, 196, 69, .58);
+    outline-offset: 3px;
+}
+
+/* Links de suporte continuam disponíveis, mas ficam discretos dentro da composição. */
+.pedzapp-login-links {
+    display: grid;
+    gap: .55rem;
+    margin-top: 1.35rem;
+    text-align: center;
+}
+
+.pedzapp-login-links a {
+    color: #966a67;
+    font-size: .86rem;
+    text-decoration: none;
+}
+
+.pedzapp-login-links a:hover {
+    color: #744a47;
+    text-decoration: underline;
+}
+
+/* Provedores externos só aparecem quando o Identity efetivamente os disponibiliza. */
+.pedzapp-login-external {
+    border-top: 1px solid #ebe7e1;
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    text-align: center;
+}
+
+.pedzapp-login-external > p {
+    color: #727272;
+    font-size: .82rem;
+    margin: 0 0 .7rem;
+}
+
+.pedzapp-login-provider {
+    background: #fff6da;
+    border: 1px solid #f0d98e;
+    border-radius: 10px;
+    color: #72520a;
+    font-weight: 750;
+    padding: .65rem 1rem;
+}
+
+/* Em telas menores o cartão mantém margens laterais e controles confortáveis para toque. */
+@media (max-width: 480px) {
+    .pedzapp-login-page {
+        align-items: flex-start;
+        padding: 1rem;
+    }
+
+    .pedzapp-login-card {
+        border-radius: 18px;
+        margin-top: 1rem;
+        padding: 1.5rem;
+    }
+}

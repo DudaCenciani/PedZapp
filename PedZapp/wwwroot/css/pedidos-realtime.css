@@ -1,0 +1,129 @@
+/* Área flutuante compartilhada pelo painel e pelo quadro de pedidos. */
+.pedidos-realtime-toasts {
+    position: fixed;
+    z-index: 2000;
+    right: 1rem;
+    top: 1rem;
+    display: grid;
+    width: min(23rem, calc(100vw - 2rem));
+    gap: .75rem;
+    pointer-events: none;
+}
+
+/* Cartão do aviso: leve, visível e alinhado à identidade amarelo/rosé do PedZapp. */
+.pedido-realtime-toast {
+    display: grid;
+    gap: .75rem;
+    padding: 1rem;
+    color: #252525;
+    background: #fff;
+    border: 1px solid #f0dda0;
+    border-left: .35rem solid #f6c445;
+    border-radius: 1rem;
+    box-shadow: 0 .8rem 2rem rgba(37, 37, 37, .18);
+    pointer-events: auto;
+    animation: pedido-realtime-in .22s ease-out;
+}
+
+.pedido-realtime-toast__header,
+.pedido-realtime-toast__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+}
+
+.pedido-realtime-toast__header strong {
+    color: #8c5f00;
+    font-size: .8rem;
+    letter-spacing: .07em;
+}
+
+.pedido-realtime-toast__body {
+    display: grid;
+    gap: .2rem;
+}
+
+.pedido-realtime-toast__body strong {
+    font-size: 1.05rem;
+}
+
+.pedido-realtime-toast__body span,
+.pedido-realtime-toast__body small {
+    color: #6c6764;
+}
+
+.pedido-realtime-toast__close {
+    border: 0;
+    padding: .1rem .35rem;
+    color: #6c6764;
+    background: transparent;
+    font-size: 1.25rem;
+    line-height: 1;
+}
+
+.pedido-realtime-toast__link,
+.pedido-realtime-toast__sound {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.25rem;
+    padding: .45rem .75rem;
+    border-radius: .7rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.pedido-realtime-toast__link {
+    color: #252525;
+    background: #f6c445;
+}
+
+.pedido-realtime-toast__sound {
+    border: 1px solid #c98d86;
+    color: #784c47;
+    background: #fff6da;
+}
+
+/* Contador discreto no acesso de Pedidos enquanto houver eventos ainda não revisados nesta aba. */
+.pedidos-realtime-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.35rem;
+    min-height: 1.35rem;
+    margin-left: .3rem;
+    padding: .05rem .35rem;
+    border-radius: 999px;
+    color: #fff;
+    background: #c33f37;
+    font-size: .72rem;
+    vertical-align: middle;
+}
+
+/* O botão só é renderizado em Development e permite testar o mesmo fluxo sem gravar um pedido. */
+.pedido-realtime-test {
+    margin: 1rem 0;
+}
+
+.pedido-realtime-test button {
+    border: 1px dashed #c98d86;
+    padding: .5rem .8rem;
+    border-radius: .7rem;
+    color: #784c47;
+    background: #fff6da;
+    font-weight: 700;
+}
+
+@keyframes pedido-realtime-in {
+    from { opacity: 0; transform: translateY(1rem); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 576px) {
+    .pedidos-realtime-toasts {
+        right: .75rem;
+        top: .75rem;
+        width: calc(100vw - 1.5rem);
+    }
+}

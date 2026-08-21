@@ -1,0 +1,56 @@
+/* ==================================================
+   Estrutura e leitura do checkout público
+   ================================================== */
+.checkout-publico {
+    --checkout-card: #fff;
+    --checkout-muted: #706d68;
+    padding: 1.25rem 1rem 2rem;
+}
+
+.checkout-header { border-radius: 20px; padding: 1.35rem 1.5rem; }
+.checkout-header h1 { font-size: clamp(1.35rem, 3vw, 1.75rem); font-weight: 850; }
+.checkout-header a { border: 1px solid #e9cfcb; border-radius: 10px; padding: .6rem .8rem; }
+.checkout-form, .checkout-summary { border-radius: 20px; box-shadow: 0 10px 28px rgba(37, 37, 37, .055); }
+.checkout-form { padding: clamp(1.15rem, 3vw, 1.75rem); }
+.checkout-form h2 { font-size: 1.28rem; font-weight: 850; }
+.checkout-section-intro { color: var(--checkout-muted); font-size: .88rem; margin: -.55rem 0 1rem; }
+
+/* ==================================================
+   Etapas, opções de recebimento e pagamento
+   ================================================== */
+.checkout-steps { background: #f8f7f5; border-radius: 12px; justify-content: space-between; padding: .55rem .7rem; }
+.checkout-steps li { flex: 1; }
+.checkout-choice { gap: .75rem; }
+.checkout-choice label, .checkout-payment { background: #fff; border-color: #e8e1d8; border-radius: 14px; min-height: 76px; padding: .9rem; transition: background-color .18s ease, border-color .18s ease, box-shadow .18s ease; }
+.checkout-choice label:has(input:checked), .checkout-payment:has(input:checked) { background: #fff6da; border-color: var(--cor-primaria, #f6c445); box-shadow: 0 7px 18px rgba(201, 141, 134, .12); }
+.checkout-choice label input, .checkout-payment input { accent-color: var(--cor-primaria, #f6c445); height: 1.1rem; }
+.checkout-choice label > span:not(.checkout-choice__icon) { display: grid; gap: .12rem; }
+.checkout-choice small { color: var(--checkout-muted); font-size: .76rem; font-weight: 400; }
+.checkout-choice__icon { align-items: center; background: #fff6da; border-radius: 10px; color: #8f6810; display: inline-flex; font-size: 1.2rem; height: 38px; justify-content: center; width: 38px; }
+.checkout-payment { justify-content: flex-start; }
+.checkout-payment > span:nth-child(2) { flex: 1; }
+.checkout-payment__radio { border: 2px solid #c7bcb0; border-radius: 50%; height: 18px; width: 18px; }
+.checkout-payment:has(input:checked) .checkout-payment__radio { border: 5px solid var(--cor-primaria, #f6c445); }
+
+/* ==================================================
+   Campos, endereço e resumo financeiro
+   ================================================== */
+.checkout-form input:not([type="radio"]):not([type="checkbox"]), .checkout-form select { background: #fffdf8; border-radius: 11px; min-height: 46px; }
+.checkout-form input:focus, .checkout-form select:focus { border-color: var(--cor-primaria, #f6c445); box-shadow: 0 0 0 .2rem rgba(246, 196, 69, .18); outline: 0; }
+.checkout-address { background: #f8f7f5; border-radius: 14px; margin-top: 1rem; padding: .4rem .9rem .8rem; }
+.checkout-summary { background: #fffdf9; }
+.checkout-summary h2 { font-weight: 850; }
+.checkout-summary__total { background: #fff6da; border-radius: 10px; margin-top: .8rem; padding: .8rem !important; }
+.checkout-summary__total dd { color: #5d4408; font-size: 1.3rem; }
+.checkout-actions button { border-radius: 11px; min-height: 46px; }
+
+/* ==================================================
+   Responsividade mobile first
+   ================================================== */
+@media (max-width: 799px) {
+    .checkout-publico { padding: .75rem .75rem 1.25rem; }
+    .checkout-header { gap: .8rem; padding: 1.1rem; }
+    .checkout-header a { width: 100%; }
+    .checkout-choice label, .checkout-payment { min-height: 72px; }
+    .checkout-summary { margin-bottom: 1rem; }
+}

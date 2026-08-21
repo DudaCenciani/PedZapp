@@ -1,0 +1,28 @@
+@using System.Text.Json
+@model PedZapp.ViewModels.Pedido.PedidoManualCreateViewModel
+@{
+    ViewData["Title"] = "Novo pedido manual";
+    var dados = JsonSerializer.Serialize(new { categorias = Model.Categorias, produtos = Model.Produtos, adicionais = Model.Adicionais, bairros = Model.Bairros, pagamentos = Model.FormasPagamento });
+}
+<link rel="stylesheet" href="~/css/pedido-manual.css" asp-append-version="true" />
+<main class="pedido-manual-page" data-pedido-manual data-dados='@Html.Raw(dados)'>
+    @* Oferece retorno ao painel da empresa, independente do retorno interno para pedidos. *@
+    <partial name="_BotaoVoltarPainel" model="Model.Slug" />
+    <header class="pedido-manual-header"><div><p>Operação · @Model.Slug</p><h1>Novo pedido manual</h1><span>Registre pedidos recebidos por telefone, WhatsApp ou balcão</span></div><a asp-action="Index" asp-route-slug="@Model.Slug">← Voltar para pedidos</a></header>
+    <form class="pedido-manual-layout" asp-action="Novo" asp-route-slug="@Model.Slug" method="post" data-manual-form>
+        @Html.AntiForgeryToken()
+        <section class="pedido-manual-main">
+            <fieldset class="pedido-manual-card"><legend>1. Cliente</legend><label>Nome <input data-field="nome" maxlength="160" required autocomplete="name" /></label><label>Telefone / WhatsApp <input data-field="telefone" maxlength="20" required inputmode="tel" autocomplete="tel" /></label><label>Observação geral <textarea data-field="observacao-geral" maxlength="500" rows="3" placeholder="Ex.: cliente prefere receber ligação"></textarea></label></fieldset>
+            <fieldset class="pedido-manual-card"><legend>2. Tipo de atendimento</legend><div class="choice-group"><label><input data-field="tipo" type="radio" name="tipo-atendimento" value="0" checked /> Entrega</label><label><input data-field="tipo" type="radio" name="tipo-atendimento" value="1" /> Retirada / balcão</label></div><p class="field-hint">Pedidos de balcão usam retirada e não recebem taxa de entrega.</p></fieldset>
+            <section class="pedido-manual-card"><h2>3. Produtos</h2>
+                @if (!Model.Produtos.Any()) { <p class="empty-state">Não há produtos ativos disponíveis para criar um pedido.</p> }
+                else { <div class="product-builder"><label>Buscar produto <input data-field="busca-produto" placeholder="Digite o nome do produto" /></label><label>Categoria <select data-field="categoria"><option value="">Todas as categorias</option>@foreach (var categoria in Model.Categorias) { <option value="@categoria.Id">@categoria.Nome</option> }</select></label><label>Produto <select data-field="produto"></select></label><label>Quantidade <input data-field="quantidade" type="number" min="1" max="99" value="1" /></label><div class="manual-addons" data-adicionais></div><label data-observacao-item>Observação do item <textarea data-field="observacao-item" maxlength="500" rows="2" placeholder="Ex.: sem cebola"></textarea></label><button type="button" class="button-primary" data-adicionar-item>Adicionar ao pedido</button></div> }
+            </section>
+            <section class="pedido-manual-card"><div class="section-heading"><h2>4. Itens do pedido</h2><span data-total-itens>0 itens</span></div><div data-itens class="manual-items"><p class="empty-state">Adicione produtos para montar o pedido.</p></div></section>
+            <fieldset class="pedido-manual-card" data-entrega><legend>5. Entrega ou retirada</legend><div data-campos-entrega><label>Bairro <select data-field="bairro"><option value="">Selecione o bairro</option>@foreach (var bairro in Model.Bairros) { <option value="@bairro.Id">@bairro.Nome — R$ @bairro.TaxaEntrega.ToString("N2")</option> }</select></label><div class="address-grid"><label>Rua <input data-field="rua" maxlength="160" /></label><label>Número <input data-field="numero" maxlength="20" /></label></div><label class="inline-check"><input data-field="sem-numero" type="checkbox" /> Sem número</label><label>Complemento <input data-field="complemento" maxlength="160" /></label><label>Referência <input data-field="referencia" maxlength="300" /></label></div><p data-retirada class="field-hint" hidden>Retirada ou balcão: não há taxa nem endereço de entrega.</p></fieldset>
+            <fieldset class="pedido-manual-card"><legend>6. Pagamento</legend><label>Forma de pagamento <select data-field="pagamento" required><option value="">Selecione a forma</option>@foreach (var pagamento in Model.FormasPagamento) { <option value="@pagamento.Id" data-tipo="@((int)pagamento.Tipo)" data-aceita-troco="@pagamento.AceitaTroco.ToString().ToLowerInvariant()">@pagamento.Nome</option> }</select></label><div data-troco hidden><label class="inline-check"><input data-field="precisa-troco" type="checkbox" /> Precisa de troco</label><label data-valor-troco hidden>Troco para quanto? <input data-field="troco-para" inputmode="decimal" placeholder="0,00" /></label></div></fieldset>
+        </section>
+        <aside class="pedido-manual-summary"><h2>Resumo do pedido</h2><dl><div><dt>Itens</dt><dd data-resumo-itens>0</dd></div><div><dt>Subtotal</dt><dd data-subtotal>R$ 0,00</dd></div><div><dt>Taxa de entrega</dt><dd data-taxa>R$ 0,00</dd></div><div class="summary-total"><dt>Total</dt><dd data-total>R$ 0,00</dd></div></dl><p data-resumo-tipo>Entrega</p><p data-resumo-pagamento>Selecione o pagamento</p><p class="manual-form-error" data-erro role="alert" hidden></p><button class="button-primary button-create" type="submit" data-criar-pedido>Criar pedido</button><p class="field-hint">Os valores são recalculados e validados no servidor antes da criação.</p></aside>
+    </form>
+</main>
+<script src="~/js/pedido-manual.js" asp-append-version="true"></script>

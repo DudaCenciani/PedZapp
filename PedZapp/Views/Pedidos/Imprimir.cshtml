@@ -1,0 +1,139 @@
+@using PedZapp.Enums
+@using System.Globalization
+@using System.Linq
+@model PedZapp.ViewModels.Pedido.PedidoImpressaoViewModel
+
+@{
+    Layout = "_ImpressaoLayout";
+    ViewData["Title"] = $"Impressão #{Model.NumeroPedido}";
+    var cultura = new CultureInfo("pt-BR");
+    var entrega = Model.TipoAtendimento == TipoAtendimento.Entrega;
+    var mesa = Model.TipoAtendimento == TipoAtendimento.Mesa;
+    // Junta somente as partes informadas do endereço para impedir linhas vazias ou o texto "null" no cupom.
+    var descricaoLocal = string.Join(", ", new[] { Model.Rua, Model.NumeroEndereco }
+        .Where(parte => !string.IsNullOrWhiteSpace(parte)));
+    // O pagamento de mesa é definido no fechamento da conta e, por isso, não deve aparecer como informação pendente.
+    var exibirPagamento = !mesa && !string.IsNullOrWhiteSpace(Model.FormaPagamento);
+}
+
+@* Folha complementar exclusiva do conteúdo do cupom térmico, sem interferir no fluxo de impressão. *@
+<link rel="stylesheet" href="~/css/pedido-impressao-conteudo.css" asp-append-version="true" />
+
+<main class="pedido-print"
+      data-pedido-impressao
+      data-concluir-url="@Url.Action("ConcluirImpressao", "Pedidos", new { slug = Model.Slug, codigoPublico = Model.CodigoPublico, tokenPublico = Model.TokenImpressao })"
+      data-voltar-url="@Url.Action("Index", "Pedidos", new { slug = Model.Slug })">
+    @Html.AntiForgeryToken()
+
+    <header class="pedido-print__header">
+        <strong>@Model.NomeEmpresa</strong>
+        <span>VIA @Model.TipoImpressao.ToString().ToUpperInvariant()</span>
+        <h1>PEDIDO #@Model.NumeroPedido</h1>
+        <p>@Model.DataCriacao.ToLocalTime().ToString("dd/MM/yyyy HH:mm") · @(Model.Origem == OrigemPedido.Mesa ? "Mesa" : Model.Origem == OrigemPedido.Manual ? "Manual" : "Site")</p>
+        <p>@(entrega ? "ENTREGA" : mesa ? "MESA" : "RETIRADA / BALCÃO")</p>
+        @if (mesa && !string.IsNullOrWhiteSpace(Model.Mesa))
+        {
+            @* Mesa e comanda são úteis somente no atendimento presencial. *@
+            <p class="pedido-print__table-info"><strong>@Model.Mesa@(string.IsNullOrWhiteSpace(Model.NumeroComanda) ? string.Empty : $" · {Model.NumeroComanda}")</strong></p>
+        }
+        @if (mesa && !string.IsNullOrWhiteSpace(Model.Funcionario))
+        {
+            <p>Funcionário: @Model.Funcionario</p>
+        }
+    </header>
+
+    <section class="pedido-print__items">
+        <h2>Itens</h2>
+        @* Todos os itens usam o nome salvo no pedido; bebidas seguem a mesma lista, sem classificação especial. *@
+        @foreach (var item in Model.Itens)
+        {
+            <article>
+                <div class="pedido-print__item-head">
+                    <strong><b>@item.Quantidade×</b> @item.Nome</strong>
+                    @* O subtotal é um snapshot histórico gravado no pedido e não é recalculado na impressão. *@
+                    <span>R$ @item.Subtotal.ToString("N2", cultura)</span>
+                </div>
+                @if (item.Adicionais.Any())
+                {
+                    @* Adicionais pertencem ao item salvo e ficam visualmente recuados no cupom. *@
+                    @foreach (var adicional in item.Adicionais)
+                    {
+                        <p class="pedido-print__addition">+ @adicional</p>
+                    }
+                }
+                @if (!string.IsNullOrWhiteSpace(item.Observacao))
+                {
+                    <p class="pedido-print__obs">Observação: @item.Observacao</p>
+                }
+            </article>
+        }
+    </section>
+
+    @if (!string.IsNullOrWhiteSpace(Model.ObservacaoGeral))
+    {
+        <section class="pedido-print__obs pedido-print__general">
+            OBS. GERAL: @Model.ObservacaoGeral
+        </section>
+    }
+
+    @if (!mesa && !string.IsNullOrWhiteSpace(Model.NomeCliente))
+    {
+        <section class="pedido-print__section">
+            <h2>Cliente</h2>
+            <p><strong>@Model.NomeCliente</strong></p>
+            @if (entrega && !string.IsNullOrWhiteSpace(Model.TelefoneCliente))
+            {
+                <p>@Model.TelefoneCliente</p>
+            }
+        </section>
+    }
+
+    @if (entrega)
+    {
+        @* A área de entrega mostra apenas campos preenchidos e mantém os dados do pedido já isolado pela empresa. *@
+        <section class="pedido-print__section">
+            <h2>Entrega</h2>
+            @if (!string.IsNullOrWhiteSpace(Model.Bairro))
+            {
+                <p><span class="pedido-print__label">Bairro:</span> @Model.Bairro</p>
+            }
+            <p><span class="pedido-print__label">Taxa:</span> R$ @Model.TaxaEntrega.ToString("N2", cultura)</p>
+            @if (!string.IsNullOrWhiteSpace(descricaoLocal))
+            {
+                <p><span class="pedido-print__label">Descrição do local:</span> @descricaoLocal</p>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.Complemento))
+            {
+                <p><span class="pedido-print__label">Complemento:</span> @Model.Complemento</p>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.Referencia))
+            {
+                <p><span class="pedido-print__label">Referência:</span> @Model.Referencia</p>
+            }
+        </section>
+    }
+
+    @if (exibirPagamento)
+    {
+        <section class="pedido-print__section">
+            <h2>Pagamento</h2>
+            <p>@Model.FormaPagamento</p>
+            @if (Model.PrecisaTroco && Model.TrocoPara.HasValue)
+            {
+                <p>Troco para R$ @Model.TrocoPara.Value.ToString("N2", cultura)</p>
+            }
+        </section>
+    }
+
+    @* O total vem do snapshot final do pedido, mantendo a impressão consistente com o fechamento original. *@
+    <footer class="pedido-print__total">
+        <p>Subtotal <span>R$ @Model.Subtotal.ToString("N2", cultura)</span></p>
+        @if (entrega)
+        {
+            <p>Taxa <span>R$ @Model.TaxaEntrega.ToString("N2", cultura)</span></p>
+        }
+        <strong>Total <span>R$ @Model.Total.ToString("N2", cultura)</span></strong>
+    </footer>
+</main>
+
+<script src="~/js/pedido-impressao.js" asp-append-version="true"></script>

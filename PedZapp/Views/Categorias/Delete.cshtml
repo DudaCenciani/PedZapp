@@ -1,0 +1,52 @@
+﻿@model PedZapp.Models.Categoria
+
+@{
+    ViewData["Title"] = "Excluir Categoria";
+    // Recupera o slug da navegação atual sem introduzir um identificador interno na View.
+    var slug = Context.Request.Query["slug"].ToString();
+}
+
+<main class="container mt-5 pz-admin-card">
+    @* O cabeçalho mantém a rota de retorno e deixa claro que esta é uma confirmação destrutiva. *@
+    <partial name="_CabecalhoAdministrativo" model='new PedZapp.ViewModels.Shared.CabecalhoAdministrativoViewModel { Slug = slug, Icone = "⌫", Titulo = "Excluir categoria", Descricao = "Confirme a exclusão da categoria selecionada." }' />
+
+    <div class="pz-admin-alert pz-admin-alert--error">
+
+        <h4>Excluir Categoria</h4>
+
+        <p>
+
+            Deseja realmente excluir:
+
+            <strong>
+                @Model.Nome
+            </strong>?
+
+        </p>
+
+    </div>
+
+    <form asp-action="Delete" method="post">
+
+        @Html.AntiForgeryToken()
+
+        <input asp-for="Id"
+               type="hidden" />
+
+        <button type="submit"
+                class="pz-btn pz-btn--danger">
+
+            Excluir
+
+        </button>
+
+        <a asp-action="Index"
+           class="pz-btn pz-btn--neutral">
+
+            Cancelar
+
+        </a>
+
+    </form>
+
+</main>

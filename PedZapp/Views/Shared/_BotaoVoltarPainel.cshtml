@@ -1,0 +1,3 @@
+@model string
+@* Reutiliza o slug já disponível na View para retornar ao painel administrativo da mesma empresa. *@
+<a asp-controller="PainelEmpresa" asp-action="Index" asp-route-slug="@Model" class="btn-voltar-painel">← Voltar ao painel</a>

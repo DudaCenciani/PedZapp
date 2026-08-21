@@ -1,0 +1,37 @@
+@model IEnumerable<PedZapp.Models.Categoria>
+
+@{
+    ViewData["Title"] = "Categorias";
+    var slug = Context.Request.Query["slug"].ToString();
+}
+
+<link rel="stylesheet" href="~/css/categorias.css" asp-append-version="true" />
+
+<main class="categorias-page">
+    @* O cabeçalho reutilizável concentra título, ação existente e retorno preservando o slug atual. *@
+    <partial name="_CabecalhoAdministrativo" model='new PedZapp.ViewModels.Shared.CabecalhoAdministrativoViewModel { Slug = slug, Icone = "▦", Titulo = "Categorias", Descricao = "Organize os produtos do cardápio por categorias.", AcaoTexto = "Nova categoria", AcaoUrl = Url.Action("Create", new { slug }) }' />
+
+    <div class="categorias-summary"><strong>@Model.Count()</strong> categoria@(Model.Count() == 1 ? string.Empty : "s") cadastrada@(Model.Count() == 1 ? string.Empty : "s")</div>
+
+    @if (!Model.Any())
+    {
+        <section class="categorias-empty"><span aria-hidden="true">▦</span><h2>Nenhuma categoria cadastrada.</h2><p>Crie categorias para organizar melhor o seu cardápio.</p><a asp-action="Create" asp-route-slug="@slug" class="btn categorias-primary-button">Cadastrar primeira categoria</a></section>
+    }
+    else
+    {
+        <section class="categorias-grid" aria-label="Categorias cadastradas">
+            @foreach (var item in Model)
+            {
+                <article class="categoria-card">
+                    <div class="categoria-card__icon" aria-hidden="true">▦</div>
+                    <div class="categoria-card__content"><h2>@item.Nome</h2><p>@item.Produtos.Count produto@(item.Produtos.Count == 1 ? string.Empty : "s") nesta categoria</p></div>
+                    <span class="categoria-status @(item.Ativa ? "categoria-status--active" : "categoria-status--inactive")">@(item.Ativa ? "Ativa" : "Inativa")</span>
+                    <div class="categoria-card__actions">
+                        <a asp-action="Edit" asp-route-id="@item.Id" asp-route-slug="@slug" class="btn categoria-edit-button"><span aria-hidden="true">✎</span> Editar</a>
+                        <a asp-action="Delete" asp-route-id="@item.Id" asp-route-slug="@slug" class="btn categoria-delete-button"><span aria-hidden="true">⌫</span> Excluir</a>
+                    </div>
+                </article>
+            }
+        </section>
+    }
+</main>

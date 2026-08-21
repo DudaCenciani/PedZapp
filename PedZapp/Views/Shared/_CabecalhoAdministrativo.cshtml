@@ -1,0 +1,21 @@
+@model PedZapp.ViewModels.Shared.CabecalhoAdministrativoViewModel
+@* Padroniza o topo das páginas internas e reutiliza o slug da própria View para voltar ao painel correto. *@
+<header class="pz-admin-header">
+    <div class="pz-admin-header__identity">
+        <span class="pz-admin-header__icon" aria-hidden="true">@Model.Icone</span>
+        <div>
+            <p class="pz-admin-header__eyebrow">Administração · @Model.Slug</p>
+            <h1>@Model.Titulo</h1>
+            <p>@Model.Descricao</p>
+        </div>
+    </div>
+    <div class="pz-admin-header__actions">
+        @* Mantém o retorno sem EmpresaId e sem URL fixa, usando a rota existente do painel. *@
+        <partial name="_BotaoVoltarPainel" model="Model.Slug" />
+        @if (!string.IsNullOrWhiteSpace(Model.AcaoTexto) && !string.IsNullOrWhiteSpace(Model.AcaoUrl))
+        {
+            @* Renderiza ação apenas quando a View já forneceu uma rota funcional existente. *@
+            <a class="pz-btn pz-btn--primary" href="@Model.AcaoUrl">＋ @Model.AcaoTexto</a>
+        }
+    </div>
+</header>

@@ -1,0 +1,192 @@
+@using System.Globalization
+@model PedZapp.ViewModels.Produto.ProdutosIndexVM
+
+@{
+    ViewData["Title"] = "Produtos";
+    var cultura = new CultureInfo("pt-BR");
+}
+
+<link rel="stylesheet" href="~/css/produtos.css" asp-append-version="true" />
+
+<section class="produtos-page">
+    @* O componente preserva o slug do ViewModel ao retornar à área administrativa da empresa. *@
+    <partial name="_BotaoVoltarPainel" model="Model.Slug" />
+    <header class="produtos-header">
+        <div>
+            <p class="produtos-eyebrow">Cardápio · @Model.Slug</p>
+            <h1>Produtos</h1>
+            <p>Gerencie os produtos do cardápio da sua empresa.</p>
+        </div>
+        <button class="btn produtos-primary-button" type="button" data-bs-toggle="modal" data-bs-target="#novoProdutoModal">
+            <span aria-hidden="true">+</span> Novo Produto
+        </button>
+    </header>
+
+    @if (TempData["Sucesso"] is string sucesso)
+    {
+        <div class="produtos-feedback produtos-feedback--success" role="status">@sucesso</div>
+    }
+
+    @if (Model.Categorias.Count == 0)
+    {
+        <div class="produtos-feedback" role="note">
+            Cadastre ao menos uma categoria antes de incluir produtos. Somente categorias da sua empresa podem ser usadas.
+        </div>
+    }
+
+    @if (Model.TotalProdutos == 0)
+    {
+        <section class="produtos-empty" aria-labelledby="empty-title">
+            <span class="produtos-empty__icon" aria-hidden="true">▦</span>
+            <h2 id="empty-title">Nenhum produto cadastrado.</h2>
+            <p>Comece a montar um cardápio bonito e fácil de gerenciar.</p>
+            <button class="btn produtos-primary-button" type="button" data-bs-toggle="modal" data-bs-target="#novoProdutoModal">
+                Cadastrar primeiro produto
+            </button>
+        </section>
+    }
+    else
+    {
+        <section class="produtos-lista" aria-label="Produtos cadastrados">
+            @foreach (var grupo in Model.ProdutosPorCategoria)
+            {
+                <div class="produtos-categoria">
+                    <div class="produtos-categoria__title">
+                        <h2>@grupo.Nome</h2>
+                        <span>@grupo.Produtos.Count produto@(grupo.Produtos.Count == 1 ? string.Empty : "s")</span>
+                    </div>
+
+                    <div class="produtos-grid">
+                        @foreach (var produto in grupo.Produtos)
+                        {
+                            var precoExibido = produto.PrecoPromocional ?? produto.Preco;
+                            <article class="produto-card">
+                                <div class="produto-card__image" aria-label="Imagem do produto">
+                                    <div class="produto-card__placeholder" aria-hidden="true">
+                                        <span>◫</span>
+                                        <small>Sem imagem</small>
+                                    </div>
+                                    @if (produto.PossuiImagem)
+                                    {
+                                        @* Carrega bytes somente pelo endpoint isolado por slug e produto. *@
+                                        <img data-produto-imagem loading="lazy" src="@Url.Action("Produto", "Imagens", new { slug = Model.Slug, produtoId = produto.Id })" alt="Imagem de @produto.Nome" />
+                                    }
+                                </div>
+                                <div class="produto-card__content">
+                                    <div class="produto-card__topline">
+                                        <span class="produto-card__category">@produto.CategoriaNome</span>
+                                        @if (produto.Destaque)
+                                        {
+                                            <span class="produto-card__featured">Destaque</span>
+                                        }
+                                    </div>
+                                    <h3>@produto.Nome</h3>
+                                    @if (!string.IsNullOrWhiteSpace(produto.Descricao))
+                                    {
+                                        <p class="produto-card__description">@produto.Descricao</p>
+                                    }
+                                    else
+                                    {
+                                        <p class="produto-card__description produto-card__description--empty">Sem descrição cadastrada.</p>
+                                    }
+                                    <div class="produto-card__price">
+                                        @if (produto.PrecoPromocional.HasValue)
+                                        {
+                                            <del>R$ @produto.Preco.ToString("N2", cultura)</del>
+                                        }
+                                        <strong>R$ @precoExibido.ToString("N2", cultura)</strong>
+                                    </div>
+                                    <div class="produto-card__footer">
+                                        <span class="produto-status @(produto.Ativo ? "produto-status--active" : "produto-status--inactive")">
+                                            @(produto.Ativo ? "Ativo" : "Inativo")
+                                        </span>
+                                        @* Disponível controla venda temporária sem alterar o cadastro Ativo do produto. *@
+                                        <span class="produto-status @(produto.Disponivel ? "produto-status--available" : "produto-status--unavailable")">
+                                            @(produto.Disponivel ? "🟢 Disponível" : "🔴 Indisponível")
+                                        </span>
+                                    </div>
+                                    <div class="produto-card__actions">
+                                        <button class="btn produtos-edit-button" type="button" data-bs-toggle="modal" data-bs-target="#editarProduto-@produto.Id"><span aria-hidden="true">✎</span> Editar</button>
+                                        <form asp-action="AlterarDisponibilidade" asp-route-slug="@Model.Slug" asp-route-id="@produto.Id" method="post">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="disponivel" value="@((!produto.Disponivel).ToString().ToLowerInvariant())" />
+                                            <button class="btn produtos-availability-button @(produto.Disponivel ? "produtos-availability-button--disable" : "produtos-availability-button--enable")" type="submit">
+                                                @(produto.Disponivel ? "Tornar indisponível" : "Tornar disponível")
+                                            </button>
+                                        </form>
+                                        <button class="btn produtos-delete-button" type="button" data-bs-toggle="modal" data-bs-target="#excluirProduto-@produto.Id"><span aria-hidden="true">⌫</span> Excluir</button>
+                                    </div>
+                                </div>
+                            </article>
+
+                            <div class="modal fade" id="editarProduto-@produto.Id" tabindex="-1" aria-labelledby="editarProdutoTitulo-@produto.Id" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-scrollable modal-lg">
+                                    <form class="modal-content produtos-modal" asp-action="Editar" asp-route-slug="@Model.Slug" asp-route-id="@produto.Id" method="post" enctype="multipart/form-data">
+                                        @Html.AntiForgeryToken()
+                                        <div class="modal-header"><div><p class="produtos-eyebrow">Editar produto</p><h2 id="editarProdutoTitulo-@produto.Id">@produto.Nome</h2></div><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button></div>
+                                        <div class="modal-body produtos-form">
+                                            <div class="produtos-form__field produtos-form__field--wide"><label for="edit-nome-@produto.Id">Nome do produto</label><input id="edit-nome-@produto.Id" name="Nome" maxlength="160" required value="@produto.Nome" /></div>
+                                            <div class="produtos-form__field"><label for="edit-categoria-@produto.Id">Categoria</label><select id="edit-categoria-@produto.Id" name="CategoriaId" required><option value="">Selecione</option>@foreach (var categoria in Model.Categorias) { <option value="@categoria.Id" selected="@(categoria.Id == produto.CategoriaId)">@categoria.Nome</option> }</select></div>
+                                            <div class="produtos-form__field"><label for="edit-preco-@produto.Id">Preço</label><input id="edit-preco-@produto.Id" name="Preco" type="number" min="0" step="0.01" required value="@produto.Preco.ToString("0.00", CultureInfo.InvariantCulture)" /></div>
+                                            <div class="produtos-form__field"><label for="edit-promocional-@produto.Id">Preço promocional</label><input id="edit-promocional-@produto.Id" name="PrecoPromocional" type="number" min="0" step="0.01" value="@(produto.PrecoPromocional?.ToString("0.00", CultureInfo.InvariantCulture))" /></div>
+                                            <div class="produtos-form__field"><label for="edit-tempo-@produto.Id">Tempo de preparo (min.)</label><input id="edit-tempo-@produto.Id" name="TempoPreparoMinutos" type="number" min="1" max="1440" value="@produto.TempoPreparoMinutos" /></div>
+                                            @* O arquivo é enviado para ImagemArquivo; a validação crítica ocorre no serviço. *@
+                                            <div class="produtos-form__field produtos-form__field--wide"><label for="edit-imagem-@produto.Id">Trocar imagem <small>JPG, PNG ou WebP · até 2 MB</small></label><input id="edit-imagem-@produto.Id" name="ImagemArquivo" type="file" accept="image/jpeg,image/png,image/webp" data-imagem-input /></div><label class="produtos-form__field produtos-form__field--wide"><input name="RemoverImagem" type="checkbox" value="true" /> Remover imagem atual</label>
+                                            <div class="produtos-form__field produtos-form__field--wide"><label for="edit-descricao-@produto.Id">Descrição</label><textarea id="edit-descricao-@produto.Id" name="Descricao" maxlength="1000" rows="3">@produto.Descricao</textarea></div>
+                                            <div class="produtos-form__checks produtos-form__field--wide"><label><input type="checkbox" name="Destaque" value="true" checked="@produto.Destaque" /> Produto em destaque</label><label><input type="checkbox" name="Ativo" value="true" checked="@produto.Ativo" /> Produto ativo</label><label><input type="checkbox" name="PermiteObservacao" value="true" checked="@produto.PermiteObservacao" /> Permite observações</label></div>
+                                        </div>
+                                        <div class="modal-footer"><button type="button" class="btn produtos-cancel-button" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn produtos-primary-button">Salvar alterações</button></div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <div class="modal fade" id="excluirProduto-@produto.Id" tabindex="-1" aria-labelledby="excluirProdutoTitulo-@produto.Id" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <form class="modal-content produtos-modal produtos-modal--delete" asp-action="Excluir" asp-route-slug="@Model.Slug" asp-route-id="@produto.Id" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <div class="modal-header"><h2 id="excluirProdutoTitulo-@produto.Id">Excluir produto</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button></div>
+                                        <div class="modal-body"><p>Deseja realmente excluir este produto?</p><strong>@produto.Nome</strong><p class="produtos-muted">Esta ação não poderá ser desfeita.</p></div>
+                                        <div class="modal-footer"><button type="button" class="btn produtos-cancel-button" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn produtos-danger-button">Excluir produto</button></div>
+                                    </form>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </section>
+    }
+</section>
+
+<div class="modal fade" id="novoProdutoModal" tabindex="-1" aria-labelledby="novoProdutoTitulo" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <form class="modal-content produtos-modal" asp-action="Criar" asp-route-slug="@Model.Slug" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            <div class="modal-header"><div><p class="produtos-eyebrow">Novo item do cardápio</p><h2 id="novoProdutoTitulo">Novo Produto</h2></div><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button></div>
+            <div class="modal-body produtos-form">
+                <div asp-validation-summary="ModelOnly" class="text-danger produtos-form__field--wide"></div>
+                <div class="produtos-form__field produtos-form__field--wide"><label asp-for="NovoProduto.Nome">Nome do produto</label><input asp-for="NovoProduto.Nome" required /><span asp-validation-for="NovoProduto.Nome" class="text-danger"></span></div>
+                <div class="produtos-form__field"><label asp-for="NovoProduto.CategoriaId">Categoria</label><select asp-for="NovoProduto.CategoriaId" required><option value="">Selecione</option>@foreach (var categoria in Model.Categorias) { <option value="@categoria.Id">@categoria.Nome</option> }</select><span asp-validation-for="NovoProduto.CategoriaId" class="text-danger"></span></div>
+                <div class="produtos-form__field"><label asp-for="NovoProduto.Preco">Preço</label><input asp-for="NovoProduto.Preco" type="number" min="0" step="0.01" required /><span asp-validation-for="NovoProduto.Preco" class="text-danger"></span></div>
+                <div class="produtos-form__field"><label asp-for="NovoProduto.PrecoPromocional">Preço promocional</label><input asp-for="NovoProduto.PrecoPromocional" type="number" min="0" step="0.01" /></div>
+                <div class="produtos-form__field"><label asp-for="NovoProduto.TempoPreparoMinutos">Tempo de preparo (min.)</label><input asp-for="NovoProduto.TempoPreparoMinutos" type="number" min="1" max="1440" /></div>
+                @* A imagem transitória não contém EmpresaId; o serviço usa o tenant validado pelo controller. *@
+                <div class="produtos-form__field produtos-form__field--wide"><label asp-for="NovoProduto.ImagemArquivo">Imagem <small>JPG, PNG ou WebP · até 2 MB</small></label><input asp-for="NovoProduto.ImagemArquivo" type="file" accept="image/jpeg,image/png,image/webp" data-imagem-input /><span asp-validation-for="NovoProduto.ImagemArquivo" class="text-danger"></span></div>
+                <div class="produtos-form__field produtos-form__field--wide"><label asp-for="NovoProduto.Descricao">Descrição</label><textarea asp-for="NovoProduto.Descricao" rows="3"></textarea></div>
+                <div class="produtos-form__checks produtos-form__field--wide"><label><input asp-for="NovoProduto.Destaque" /> Produto em destaque</label><label><input asp-for="NovoProduto.Ativo" /> Produto ativo</label><label><input asp-for="NovoProduto.PermiteObservacao" /> Permite observações</label></div>
+            </div>
+            <div class="modal-footer"><button type="button" class="btn produtos-cancel-button" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn produtos-primary-button">Salvar Produto</button></div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.querySelectorAll('[data-produto-imagem]').forEach(function (imagem) {
+            imagem.addEventListener('error', function () {
+                imagem.classList.add('produto-card__image--failed');
+            });
+        });
+    </script>
+}

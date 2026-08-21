@@ -1,0 +1,107 @@
+﻿@model PedZapp.Models.Empresa
+
+<h2>Editar Empresa</h2>
+
+<form asp-action="Edit">
+
+    <input type="hidden" asp-for="Id" />
+
+    <div class="mb-3">
+        <label asp-for="NomeFantasia"></label>
+        <input asp-for="NomeFantasia"
+               class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="RazaoSocial"></label>
+        <input asp-for="RazaoSocial"
+               class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="CpfCnpj"></label>
+        <input asp-for="CpfCnpj"
+               class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Email"></label>
+        <input asp-for="Email"
+               class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Telefone"></label>
+        <input asp-for="Telefone"
+               class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="WhatsApp"></label>
+        <input asp-for="WhatsApp"
+               class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Descricao"></label>
+        <textarea asp-for="Descricao"
+                  class="form-control">
+        </textarea>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Endereco"></label>
+        <input asp-for="Endereco"
+               class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Numero"></label>
+        <input asp-for="Numero"
+               class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Bairro"></label>
+        <input asp-for="Bairro"
+               class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Cidade"></label>
+        <input asp-for="Cidade"
+               class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Estado"></label>
+        <input asp-for="Estado"
+               class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="CEP"></label>
+        <input asp-for="CEP"
+               class="form-control" />
+    </div>
+
+    <div class="form-check mb-3">
+        <input asp-for="Ativa"
+               class="form-check-input" />
+
+        <label asp-for="Ativa"
+               class="form-check-label">
+        </label>
+    </div>
+
+    <button type="submit"
+            class="btn btn-warning">
+        Salvar Alterações
+    </button>
+
+    <a asp-action="Index"
+       class="btn btn-secondary">
+        Voltar
+    </a>
+
+</form>

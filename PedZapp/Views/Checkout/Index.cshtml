@@ -1,0 +1,43 @@
+@using System.Globalization
+@model PedZapp.ViewModels.Checkout.CheckoutPublicoViewModel
+@{ Layout = "_CardapioPublicoLayout"; ViewData["Title"] = "Checkout"; var cultura = new CultureInfo("pt-BR"); }
+<link rel="stylesheet" href="~/css/checkout-publico.css" asp-append-version="true" />
+@* Este stylesheet trata somente a seleção visual de bairro, mantendo o restante do checkout inalterado. *@
+<link rel="stylesheet" href="~/css/checkout-bairros.css" asp-append-version="true" />
+@* Camada visual isolada: os atributos data-* continuam abastecendo o checkout seguro já existente. *@
+<link rel="stylesheet" href="~/css/checkout-experiencia.css" asp-append-version="true" />
+@* Estilos do seletor compacto que preserva o select utilizado pela validação do checkout. *@
+<link rel="stylesheet" href="~/css/checkout-bairro-seletor.css" asp-append-version="true" />
+<main class="checkout-publico" data-checkout-root data-slug="@Model.Slug" data-cor-primaria="@Model.CorPrimaria" data-cor-secundaria="@Model.CorSecundaria">
+    @* O retorno usa o slug atual, preservando a navegação dentro do cardápio da mesma empresa. *@
+    <header class="checkout-header"><div><p>@Model.NomeFantasia</p><h1>← Finalizar pedido</h1></div><a asp-controller="Cardapio" asp-action="Index" asp-route-slug="@Model.Slug">Voltar ao cardápio</a></header>
+    <div class="checkout-layout">
+        <form class="checkout-form" data-checkout-form data-finalize-url="@Url.Action("Finalizar", "Checkout", new { slug = Model.Slug })" novalidate>@Html.AntiForgeryToken()
+            <ol class="checkout-steps" aria-label="Etapas do checkout"><li class="is-current" data-step-indicator="1"><span>1</span>Atendimento</li><li data-step-indicator="2"><span>2</span>Dados</li><li data-step-indicator="3"><span>3</span>Pagamento</li><li data-step-indicator="4"><span>4</span>Revisão</li></ol>
+            <p class="checkout-error" data-checkout-error role="alert" hidden></p>
+
+            <section data-checkout-step="1"><h2>Escolha como receber o pedido</h2><p class="checkout-section-intro">Selecione a opção mais conveniente para você.</p><div class="checkout-choice"><label><input type="radio" name="atendimento" value="entrega" /><span class="checkout-choice__icon" aria-hidden="true">⌂</span><span><strong>Entrega</strong><small>Receba no endereço informado.</small></span></label><label><input type="radio" name="atendimento" value="retirada" /><span class="checkout-choice__icon" aria-hidden="true">▣</span><span><strong>Buscar o pedido</strong><small>Retire diretamente na empresa.</small></span></label></div>
+                <div data-delivery-fields hidden>
+                    @* O select existente continua como fonte de dados da validação e do envio; ele apenas deixa de ser a interface visual. *@
+                    <label class="checkout-bairro-native" for="bairro">Bairro atendido</label>
+                    <select id="bairro" data-bairro class="checkout-bairro-native" tabindex="-1" aria-hidden="true"><option value="">Selecione o bairro</option>@foreach (var bairro in Model.Bairros) { <option value="@bairro.Id" data-fee="@bairro.TaxaEntrega.ToString(CultureInfo.InvariantCulture)" data-minimum="@(bairro.PedidoMinimo?.ToString(CultureInfo.InvariantCulture) ?? "")" data-time="@(bairro.TempoEstimadoEntregaMinutos?.ToString() ?? "")">@bairro.Nome</option> }</select>
+                    @* O botão compacto apenas controla a lista visual; o select oculto continua sendo a fonte da validação existente. *@
+                    <div class="checkout-bairro-picker" data-bairro-picker><button type="button" class="checkout-bairro-toggle" data-bairro-toggle aria-expanded="false" aria-controls="bairro-lista"><span data-bairro-label>Escolha seu bairro</span><span aria-hidden="true">⌄</span></button><fieldset class="checkout-bairro-list" id="bairro-lista" data-bairro-list hidden><legend>Escolha seu bairro</legend>@foreach (var bairro in Model.Bairros) { <button type="button" class="checkout-bairro-card" data-bairro-select data-bairro-id="@bairro.Id" aria-pressed="false"><span class="checkout-bairro-card__name">@bairro.Nome</span><strong class="@(bairro.TaxaEntrega == 0 ? "checkout-bairro-card__fee--free" : string.Empty)">@(bairro.TaxaEntrega == 0 ? "Grátis" : $"R$ {bairro.TaxaEntrega.ToString("N2", cultura)}")</strong></button> }</fieldset></div>
+                    @* O retorno textual também foi simplificado para não repetir tempo ou pedido mínimo nesta etapa. *@
+                    <p class="checkout-hint" data-bairro-info></p>
+                    @* Rua permanece visível, mas a indicação comunica que estrada ou nome do local podem ser informados opcionalmente. *@
+                    <div class="checkout-address"><label>Rua, estrada ou nome do local (opcional)<input data-street maxlength="160" autocomplete="address-line1" /></label><label>Número<input data-number maxlength="20" autocomplete="address-line2" /></label><label class="checkout-toggle"><input type="checkbox" data-no-number /> Sem número</label><label>Complemento<input data-complement maxlength="160" /></label><label class="checkout-wide">Referência <input data-reference maxlength="300" /></label></div>
+                </div>
+                <div class="checkout-actions"><button type="button" data-next>Continuar</button></div>
+            </section>
+
+            <section data-checkout-step="2" hidden><h2>Confirme seus dados</h2><p class="checkout-section-intro">Usaremos essas informações para identificar o seu pedido.</p><label>Nome<input data-client-name maxlength="160" autocomplete="name" /></label><label>Telefone / WhatsApp<input data-client-phone maxlength="20" inputmode="tel" autocomplete="tel" placeholder="(11) 99999-9999" /></label>@* O opt-in é específico para atualizações operacionais deste pedido, não para marketing. *@<label class="checkout-toggle"><input type="checkbox" data-whatsapp-opt-in /> Quero receber atualizações deste pedido pelo WhatsApp.</label><p class="checkout-hint">Você poderá voltar e editar essas informações antes de finalizar.</p><div class="checkout-actions"><button type="button" class="checkout-back" data-back>Voltar</button><button type="button" data-next>Continuar</button></div></section>
+
+            <section data-checkout-step="3" hidden><h2>Forma de pagamento</h2><p class="checkout-section-intro">Escolha uma forma de pagamento disponível.</p><div class="checkout-payments">@if (!Model.FormasPagamento.Any()) { <p class="checkout-hint">Nenhuma forma de pagamento está disponível no momento.</p> }@foreach (var forma in Model.FormasPagamento) { <label class="checkout-payment"><input type="radio" name="pagamento" value="@forma.Id" data-payment-type="@forma.Tipo" data-accepts-change="@forma.AceitaTroco.ToString().ToLowerInvariant()" data-payment-note="@forma.Observacao" /> <span><strong>@forma.Nome</strong><small>@(forma.Tipo == 0 ? "Dinheiro" : forma.Tipo is 1 or 2 ? "Pagamento realizado na entrega ou retirada." : forma.Tipo == 3 ? "Pagamento via Pix na entrega ou retirada." : "Forma de pagamento cadastrada.")</small></span><span class="checkout-payment__radio" aria-hidden="true"></span></label> }</div><div data-change-fields hidden><label class="checkout-toggle"><input type="checkbox" data-needs-change /> Precisa de troco?</label><label data-change-value hidden>Troco para quanto?<input type="number" min="0" step="0.01" inputmode="decimal" data-change-for /></label></div><p class="checkout-hint" data-payment-info></p><div class="checkout-actions"><button type="button" class="checkout-back" data-back>Voltar</button><button type="button" data-next>Continuar</button></div></section>
+
+            <section data-checkout-step="4" hidden><h2>Revise seu pedido</h2><div class="checkout-review" data-checkout-review></div><p class="checkout-success" data-checkout-success hidden role="status">Checkout validado com sucesso. A criação do pedido será implementada na próxima etapa.</p><div class="checkout-actions"><button type="button" class="checkout-back" data-back>Voltar</button><button type="button" data-confirm>Confirmar pedido</button></div></section>
+        </form>
+        <aside class="checkout-summary" aria-label="Resumo do pedido"><h2>Seu pedido</h2><div data-checkout-items></div><dl><div><dt>Subtotal</dt><dd data-checkout-subtotal>R$ 0,00</dd></div><div><dt>Entrega</dt><dd data-checkout-delivery>R$ 0,00</dd></div><div class="checkout-summary__total"><dt>Total</dt><dd data-checkout-total>R$ 0,00</dd></div></dl></aside>
+    </div>
+</main>
+@section Scripts { <script src="~/js/checkout-publico.js" asp-append-version="true"></script> }

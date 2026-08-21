@@ -1,0 +1,34 @@
+@using System.Globalization
+@model PedZapp.ViewModels.Cardapio.CardapioEditorViewModel
+@{ ViewData["Title"] = "Editor do cardápio"; var cultura = new CultureInfo("pt-BR"); }
+
+<link rel="stylesheet" href="~/css/cardapio-editor.css" asp-append-version="true" />
+@* Reutiliza o retorno ao painel preservando o slug do editor. *@
+<partial name="_BotaoVoltarPainel" model="Model.Slug" />
+<main class="cardapio-editor">
+    <header class="editor-header"><div><p>Organização do cardápio</p><h1>Editor do cardápio</h1><span>Ordene categorias e produtos sem sair da sua empresa.</span></div><a asp-action="Index" asp-route-slug="@Model.Slug">Voltar à central</a></header>
+    @if (!Model.Categorias.Any())
+    { <section class="editor-empty"><h2>Você ainda não possui categorias.</h2><a asp-controller="Categorias" asp-action="Create" asp-route-slug="@Model.Slug">Criar categoria</a></section> }
+    else
+    {
+        <section class="editor-list">
+        @foreach (var categoria in Model.Categorias)
+        {
+            <article class="editor-category">
+                <header class="editor-category__header"><div><h2>@categoria.Nome</h2><span class="@(categoria.Ativa ? "editor-status--active" : "editor-status--inactive")">@(categoria.Ativa ? "Ativa" : "Inativa")</span><small>@categoria.Produtos.Count produto@(categoria.Produtos.Count == 1 ? string.Empty : "s")</small></div><div class="editor-actions"><form asp-action="MoverCategoria" asp-route-slug="@Model.Slug" asp-route-id="@categoria.Id" method="post">@Html.AntiForgeryToken()<input type="hidden" name="direcao" value="cima" /><button type="submit" aria-label="Mover @categoria.Nome para cima">↑</button></form><form asp-action="MoverCategoria" asp-route-slug="@Model.Slug" asp-route-id="@categoria.Id" method="post">@Html.AntiForgeryToken()<input type="hidden" name="direcao" value="baixo" /><button type="submit" aria-label="Mover @categoria.Nome para baixo">↓</button></form><a asp-controller="Categorias" asp-action="Edit" asp-route-id="@categoria.Id" asp-route-slug="@Model.Slug">Editar categoria</a><a asp-controller="Produtos" asp-action="Index" asp-route-slug="@Model.Slug">Gerenciar produtos</a><a asp-controller="Adicionais" asp-action="Index" asp-route-slug="@Model.Slug">Gerenciar adicionais</a></div></header>
+                @if (!categoria.Produtos.Any())
+                { <p class="editor-empty-products">Esta categoria ainda não possui produtos.</p> }
+                else
+                {
+                    <div class="editor-products">
+                    @foreach (var produto in categoria.Produtos)
+                    {
+                        <div class="editor-product"><div><strong>@produto.Nome</strong><span>R$ @produto.Preco.ToString("N2", cultura)</span><small>Ordem @produto.OrdemExibicao</small></div><div class="editor-product__badges"><span class="@(produto.Ativo ? "editor-status--active" : "editor-status--inactive")">@(produto.Ativo ? "Ativo" : "Inativo")</span>@if (produto.Destaque) { <span class="editor-featured">Destaque</span> }</div><div class="editor-actions"><form asp-action="MoverProduto" asp-route-slug="@Model.Slug" asp-route-id="@produto.Id" method="post">@Html.AntiForgeryToken()<input type="hidden" name="direcao" value="cima" /><button type="submit" aria-label="Mover @produto.Nome para cima">↑</button></form><form asp-action="MoverProduto" asp-route-slug="@Model.Slug" asp-route-id="@produto.Id" method="post">@Html.AntiForgeryToken()<input type="hidden" name="direcao" value="baixo" /><button type="submit" aria-label="Mover @produto.Nome para baixo">↓</button></form><a asp-controller="Produtos" asp-action="Index" asp-route-slug="@Model.Slug">Editar no módulo Produtos</a><a asp-controller="Produtos" asp-action="Index" asp-route-slug="@Model.Slug">Excluir ou inativar</a></div></div>
+                    }
+                    </div>
+                }
+            </article>
+        }
+        </section>
+    }
+</main>

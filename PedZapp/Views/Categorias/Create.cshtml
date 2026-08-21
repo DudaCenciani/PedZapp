@@ -1,0 +1,46 @@
+﻿@model PedZapp.Models.Categoria
+
+@{
+    ViewData["Title"] = "Nova Categoria";
+    // Recupera o slug da navegação atual sem introduzir um identificador interno na View.
+    var slug = Context.Request.Query["slug"].ToString();
+}
+
+<main class="container mt-4 pz-admin-card">
+    @* O cabeçalho preserva o slug e não altera a action existente de criação. *@
+    <partial name="_CabecalhoAdministrativo" model='new PedZapp.ViewModels.Shared.CabecalhoAdministrativoViewModel { Slug = slug, Icone = "▦", Titulo = "Nova categoria", Descricao = "Organize os produtos do cardápio por categorias." }' />
+
+    <form asp-action="Create" method="post">
+
+        <div class="mb-3">
+
+            <label asp-for="Nome"
+                   class="form-label">
+            </label>
+
+            <input asp-for="Nome"
+                   class="form-control" />
+
+            <span asp-validation-for="Nome"
+                  class="text-danger">
+            </span>
+
+        </div>
+
+        <button type="submit"
+                class="pz-btn pz-btn--primary">
+
+            Salvar Categoria
+
+        </button>
+
+        <a asp-action="Index"
+           class="pz-btn pz-btn--neutral">
+
+            Voltar
+
+        </a>
+
+    </form>
+
+</main>

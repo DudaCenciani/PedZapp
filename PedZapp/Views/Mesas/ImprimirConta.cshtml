@@ -1,0 +1,10 @@
+@using System.Globalization
+@model PedZapp.ViewModels.Mesa.ComandaViewModel
+@{ Layout = "_ImpressaoLayout"; ViewData["Title"] = "Conta da mesa"; var cultura = new CultureInfo("pt-BR"); }
+<link rel="stylesheet" href="~/css/conta-impressao.css" asp-append-version="true" />
+<main class="conta-print" data-conta-impressao>
+    <header><strong>@Model.NomeEmpresa</strong><span>CONTA DA MESA</span><h1>@Model.NomeMesa</h1><p>Comanda @Model.NumeroComanda</p><p>@Model.DataAbertura.ToLocalTime().ToString("dd/MM/yyyy HH:mm") · @Model.Funcionario</p></header>
+    <section><h2>Consumo</h2>@foreach (var item in Model.Itens) { <article><div><strong>@item.Quantidade× @item.Nome</strong>@if (item.Adicionais.Any()) { <p>+ @string.Join(" · ", item.Adicionais)</p> }@if (!string.IsNullOrWhiteSpace(item.Observacao)) { <p>Obs.: @item.Observacao</p> }</div><strong>R$ @item.Subtotal.ToString("N2", cultura)</strong></article> }</section>
+    <footer><p><span>Subtotal</span><strong>R$ @Model.Subtotal.ToString("N2", cultura)</strong></p><p><span>Taxa de serviço (@Model.PercentualTaxaServico.ToString("N2", cultura)%)</span><strong>R$ @Model.ValorTaxaServico.ToString("N2", cultura)</strong></p><p class="total"><span>Total</span><strong>R$ @Model.Total.ToString("N2", cultura)</strong></p>@if (!string.IsNullOrWhiteSpace(Model.FormaPagamento)) { <p>Pagamento: @Model.FormaPagamento</p> }@if (Model.PrecisaTroco) { <p>Troco para: R$ @Model.TrocoPara?.ToString("N2", cultura)</p> }</footer>
+</main>
+<script src="~/js/conta-impressao.js" asp-append-version="true"></script>

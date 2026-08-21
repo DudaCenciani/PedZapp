@@ -1,0 +1,70 @@
+@page
+@model LoginModel
+
+@{
+    ViewData["Title"] = "Entrar";
+}
+
+@section Styles {
+    @* A folha é carregada somente no Login para não alcançar as demais páginas do sistema. *@
+    <link rel="stylesheet" href="~/css/login.css" asp-append-version="true" />
+}
+
+<div class="pedzapp-login-page">
+    <section class="pedzapp-login-card" aria-labelledby="pedzapp-login-title">
+        <div class="pedzapp-login-brand" aria-hidden="true">PEDZAPP</div>
+        <header class="pedzapp-login-intro">
+            <p class="pedzapp-login-eyebrow">Acesso à empresa</p>
+            <h1 id="pedzapp-login-title">Bem-vindo de volta 👋</h1>
+            <p>Acesse sua conta para continuar.</p>
+        </header>
+
+        @* O formulário mantém integralmente o modelo, o ReturnUrl e a validação do Identity. *@
+        <form id="account" method="post" asp-route-returnUrl="@Model.ReturnUrl" class="pedzapp-login-form">
+            <div asp-validation-summary="ModelOnly" class="pedzapp-login-validation" role="alert"></div>
+
+            <div class="pedzapp-login-field">
+                <label asp-for="Input.Email">E-mail</label>
+                <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="nome@empresa.com" />
+                <span asp-validation-for="Input.Email" class="pedzapp-login-validation"></span>
+            </div>
+
+            <div class="pedzapp-login-field">
+                <label asp-for="Input.Password">Senha</label>
+                <input asp-for="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="Digite sua senha" />
+                <span asp-validation-for="Input.Password" class="pedzapp-login-validation"></span>
+            </div>
+
+            <label asp-for="Input.RememberMe" class="pedzapp-login-remember">
+                <input class="form-check-input" asp-for="Input.RememberMe" />
+                Lembrar de mim
+            </label>
+
+            <button id="login-submit" type="submit" class="pedzapp-login-submit">Entrar</button>
+
+            <nav class="pedzapp-login-links" aria-label="Opções de acesso">
+                <a id="forgot-password" asp-page="./ForgotPassword">Esqueci minha senha</a>
+                <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Criar uma nova conta</a>
+                <a id="resend-confirmation" asp-page="./ResendEmailConfirmation">Reenviar confirmação de e-mail</a>
+            </nav>
+        </form>
+
+        @if ((Model.ExternalLogins?.Count ?? 0) > 0)
+        {
+            @* Provedores externos continuam disponíveis quando configurados, sem ocupar espaço quando não existem. *@
+            <section class="pedzapp-login-external" aria-label="Outras formas de entrar">
+                <p>Ou entre com</p>
+                <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                    @foreach (var provider in Model.ExternalLogins!)
+                    {
+                        <button type="submit" class="pedzapp-login-provider" name="provider" value="@provider.Name" title="Entrar usando @provider.DisplayName">@provider.DisplayName</button>
+                    }
+                </form>
+            </section>
+        }
+    </section>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

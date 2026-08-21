@@ -1,0 +1,164 @@
+﻿body {
+    background: #f7f7f7;
+}
+
+.admin-dashboard {
+    max-width: 1400px;
+    margin: auto;
+    padding: 40px;
+}
+
+/* Topo */
+
+.welcome-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+    .welcome-section h1 {
+        font-size: 42px;
+        font-weight: 700;
+        color: #2B2B2B;
+    }
+
+    .welcome-section p {
+        color: #777;
+        font-size: 18px;
+    }
+
+.profile-circle {
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    background: #E9CFCB;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #444;
+    font-size: 22px;
+}
+
+/* Estatísticas */
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 25px;
+    margin-bottom: 35px;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 22px;
+    padding: 28px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: 0.3s;
+}
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+
+.stat-icon {
+    width: 65px;
+    height: 65px;
+    border-radius: 18px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 28px;
+}
+
+.stat-info h2 {
+    margin: 0;
+    font-size: 28px;
+    color: #2B2B2B;
+}
+
+.stat-info span {
+    color: #777;
+}
+
+/* Menu principal */
+
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 25px;
+}
+
+.menu-card {
+    background: white;
+    border-radius: 24px;
+    padding: 35px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    text-decoration: none;
+    color: inherit;
+    transition: 0.3s;
+}
+
+    .menu-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    }
+
+    .menu-card h3 {
+        margin-top: 20px;
+        font-size: 28px;
+        color: #2B2B2B;
+    }
+
+    .menu-card p {
+        color: #777;
+    }
+
+.menu-icon {
+    width: 65px;
+    height: 65px;
+    border-radius: 18px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 28px;
+}
+
+/* Cores */
+
+.yellow {
+    background: #FFF6DA;
+}
+
+.pink {
+    background: #FBECEF;
+}
+
+.green {
+    background: #EAF9EF;
+}
+
+.gold {
+    background: #FFF3D4;
+}
+
+.blue {
+    background: #EEF4FF;
+}
+
+.purple {
+    background: #F3EDFF;
+}
+
+.gray {
+    background: #F2F2F2;
+}
+
+.disabled {
+    opacity: .85;
+    cursor: not-allowed;
+}

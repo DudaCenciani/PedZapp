@@ -1,0 +1,67 @@
+@using System.Globalization
+@using System.Text.Json
+@model PedZapp.ViewModels.Relatorio.DashboardRelatorioViewModel
+@{
+    // Usa a cultura brasileira somente para apresentação de moeda e data na página.
+    var cultura = new CultureInfo("pt-BR");
+    // Define o título exibido pela estrutura compartilhada do site.
+    ViewData["Title"] = "Dashboard";
+    // Serializa apenas o ViewModel público já consolidado pelo servidor para o JavaScript dos gráficos.
+    var dadosIniciais = JsonSerializer.Serialize(Model, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+}
+<link rel="stylesheet" href="~/css/dashboard-relatorios.css" asp-append-version="true" />
+<main class="dashboard-page" id="dashboard-relatorios" data-dashboard-url="@Url.Action("DashboardDados", "Relatorios", new { slug = Model.Slug })">
+    @* Reutiliza a navegação de retorno sem expor identificadores internos da empresa. *@
+    <partial name="_BotaoVoltarPainel" model="Model.Slug" />
+    <header class="dashboard-header">
+        <div>
+            <p class="eyebrow">Painel automático</p>
+            <h1>Dashboard</h1>
+            <p class="dashboard-company">@Model.NomeEmpresa · @Model.AtualizadoEm.ToString("dddd, dd 'de' MMMM", cultura)</p>
+            <p class="dashboard-updated" id="ultima-atualizacao">Atualizado às @Model.AtualizadoEm.ToString("HH:mm", cultura)</p>
+        </div>
+        <div class="dashboard-actions">
+            <button type="button" class="button-secondary" id="atualizar-dashboard">↻ Atualizar dados</button>
+            <a href="#relatorios-detalhados" class="button-secondary">Relatórios detalhados</a>
+            <a asp-controller="Mesas" asp-action="Index" asp-route-slug="@Model.Slug" class="button-primary">Fechamento diário</a>
+        </div>
+    </header>
+
+    <section class="metric-grid" aria-label="Indicadores principais">
+        <article class="metric-card metric-featured"><span>◉ Vendas de hoje</span><strong id="vendas-hoje">R$ @Model.Cards.VendasHoje.ToString("N2", cultura)</strong><small id="pedidos-hoje-complemento">@Model.Cards.PedidosHoje pedidos concluídos</small></article>
+        <article class="metric-card"><span>◌ Vendas da semana</span><strong id="vendas-semana">R$ @Model.Cards.VendasSemana.ToString("N2", cultura)</strong><small>De segunda-feira até hoje</small></article>
+        <article class="metric-card"><span>◒ Vendas do mês</span><strong id="vendas-mes">R$ @Model.Cards.VendasMes.ToString("N2", cultura)</strong><small id="media-mes">Média diária: R$ @Model.ResumoMes.MediaDiaria.ToString("N2", cultura)</small></article>
+        <article class="metric-card"><span>▦ Pedidos de hoje</span><strong id="pedidos-hoje">@Model.Cards.PedidosHoje</strong><small>Somente vendas concluídas</small></article>
+        <article class="metric-card"><span>◈ Ticket médio</span><strong id="ticket-medio">R$ @Model.Cards.TicketMedioHoje.ToString("N2", cultura)</strong><small>Por pedido concluído hoje</small></article>
+    </section>
+
+    <section class="secondary-grid" aria-label="Indicadores operacionais de hoje">
+        <article><span>Delivery</span><strong id="delivery-hoje">@Model.Cards.DeliveryHoje</strong></article><article><span>Retirada</span><strong id="retirada-hoje">@Model.Cards.RetiradaHoje</strong></article><article><span>Mesas</span><strong id="mesas-hoje">@Model.Cards.MesasHoje</strong></article><article><span>Manuais</span><strong id="manuais-hoje">@Model.Cards.PedidosManuaisHoje</strong></article><article><span>Taxas de entrega</span><strong id="taxas-entrega">R$ @Model.Cards.TaxasEntregaHoje.ToString("N2", cultura)</strong></article><article><span>Taxas de serviço</span><strong id="taxas-servico">R$ @Model.Cards.TaxasServicoHoje.ToString("N2", cultura)</strong></article><article><span>Descontos</span><strong id="descontos-hoje">R$ @Model.Cards.DescontosHoje.ToString("N2", cultura)</strong></article><article><span>Cancelamentos</span><strong id="cancelamentos-hoje">@Model.Cards.CancelamentosHoje</strong></article>
+    </section>
+
+    <section class="chart-grid">
+        <article class="chart-card chart-wide"><div class="card-heading"><div><h2>Vendas dos últimos 7 dias</h2><p>Faturamento e quantidade de pedidos concluídos.</p></div></div><canvas id="grafico-sete-dias"></canvas><p class="empty-state" id="vazio-sete-dias">Ainda não houve vendas nesta semana.</p></article>
+        <article class="chart-card"><div class="card-heading"><div><h2>Formas de pagamento hoje</h2><p>Participação por valor vendido.</p></div></div><canvas id="grafico-pagamentos"></canvas><p class="empty-state" id="vazio-pagamentos">Ainda não houve vendas hoje.</p></article>
+        <article class="chart-card"><div class="card-heading"><div><h2>Pedidos por atendimento hoje</h2><p>Distribuição por canal.</p></div></div><canvas id="grafico-atendimentos"></canvas><p class="empty-state" id="vazio-atendimentos">Ainda não houve vendas hoje.</p></article>
+        <article class="chart-card chart-wide"><div class="card-heading"><div><h2>Desempenho do mês</h2><p>Do primeiro dia do mês até hoje.</p></div></div><canvas id="grafico-mes"></canvas><p class="empty-state" id="vazio-mes">Ainda não houve vendas neste mês.</p></article>
+    </section>
+
+    <section class="dashboard-columns">
+        <article class="ranking-card"><div class="card-heading"><div><h2>Mais vendidos</h2><p>Ranking de produtos concluídos.</p></div><div class="period-tabs"><button type="button" class="active" data-ranking="hoje">Hoje</button><button type="button" data-ranking="semana">Semana</button><button type="button" data-ranking="mes">Mês</button></div></div><ol id="ranking-produtos" class="ranking-list"></ol><p class="empty-state" id="vazio-ranking">Ainda não houve vendas hoje.</p></article>
+        <article class="chart-card"><div class="card-heading"><div><h2>Movimento por horário hoje</h2><p>Pedidos e faturamento por hora.</p></div></div><canvas id="grafico-horarios"></canvas><p class="empty-state" id="vazio-horarios">Ainda não houve pedidos concluídos hoje.</p></article>
+    </section>
+
+    <section class="summary-grid">
+        <article class="summary-card"><h2>Resumo da semana</h2><dl><div><dt>Total vendido</dt><dd id="semana-total">R$ @Model.ResumoSemana.TotalVendido.ToString("N2", cultura)</dd></div><div><dt>Pedidos</dt><dd id="semana-pedidos">@Model.ResumoSemana.Pedidos</dd></div><div><dt>Melhor dia</dt><dd id="semana-melhor-dia">@Model.ResumoSemana.MelhorDia</dd></div><div><dt>Produto líder</dt><dd id="semana-produto">@Model.ResumoSemana.ProdutoMaisVendido</dd></div></dl><a href="#relatorios-detalhados">Ver relatório semanal completo</a></article>
+        <article class="summary-card"><h2>Resumo do mês</h2><dl><div><dt>Total vendido</dt><dd id="mes-total">R$ @Model.ResumoMes.TotalVendido.ToString("N2", cultura)</dd></div><div><dt>Pedidos</dt><dd id="mes-pedidos">@Model.ResumoMes.Pedidos</dd></div><div><dt>Melhor dia</dt><dd id="mes-melhor-dia">@Model.ResumoMes.MelhorDia</dd></div><div><dt>Produto líder</dt><dd id="mes-produto">@Model.ResumoMes.ProdutoMaisVendido</dd></div></dl><a href="#relatorios-detalhados">Ver relatório mensal completo</a></article>
+        <article class="status-card"><span>Status do dia</span><strong id="status-dia">@Model.StatusFechamento.Situacao</strong><p><b id="pedidos-abertos">@Model.StatusFechamento.PedidosAbertos</b> pedidos abertos · <b id="comandas-abertas">@Model.StatusFechamento.ComandasAbertas</b> comandas abertas · <b id="mesas-ocupadas">@Model.StatusFechamento.MesasOcupadas</b> mesas ocupadas</p><a asp-controller="Mesas" asp-action="Index" asp-route-slug="@Model.Slug" class="button-primary">Ver fechamento</a></article>
+    </section>
+
+    <section class="detailed-reports" id="relatorios-detalhados"><h2>Relatórios detalhados</h2><p>Os indicadores acima são automáticos. Esta área fica preparada para filtros históricos sem alterar o dashboard principal.</p><div class="detail-actions"><button type="button" disabled>Hoje</button><button type="button" disabled>Ontem</button><button type="button" disabled>Semana atual</button><button type="button" disabled>Mês atual</button><span>Filtros detalhados serão disponibilizados em uma etapa própria.</span></div></section>
+</main>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" defer></script>
+    <script id="dashboard-dados-iniciais" type="application/json">@Html.Raw(dadosIniciais)</script>
+    <script src="~/js/dashboard-relatorios.js" asp-append-version="true" defer></script>
+}
